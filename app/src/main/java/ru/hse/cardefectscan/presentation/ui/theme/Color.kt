@@ -10,9 +10,9 @@ val DarkColorScheme = darkColorScheme(
     tertiary = Color(0xFF461E55),
     background = Color(0xFF150C28),
     surface = Color(0xFF2D1E36),
-    onPrimary = Color(0xFF0D1E2B),
-    onSecondary = Color(0x94251332),
-    onTertiary = Color(0xFF400B3B),
+    onPrimary = Color(0xFFA7D8FF),
+    onSecondary = Color(0x94FFFFFF),
+    onTertiary = Color(0xFFFFFFFF),
     onBackground = Color(0xFF48254C),
     onSurface = Color(0xFF0F1B40),
 )

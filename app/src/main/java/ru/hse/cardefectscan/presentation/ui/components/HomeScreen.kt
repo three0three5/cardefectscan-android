@@ -39,8 +39,7 @@ fun HomeScreen(navController: NavController) {
                 .padding(innerPadding)
                 .padding(top = topPadding)
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f)
-            ,
+                .fillMaxHeight(0.8f),
             contentAlignment = Alignment.Center
         ) {
             ButtonSet(navController)
@@ -54,8 +53,7 @@ fun ButtonSet(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = startPadding)
-        ,
+            .padding(start = startPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         ToRequestsButton(navController)
@@ -69,8 +67,7 @@ fun ToRequestsButton(navController: NavController) {
     Button(
         modifier = Modifier
             .fillMaxHeight(0.25f)
-            .fillMaxWidth(0.8f)
-        ,
+            .fillMaxWidth(0.8f),
         onClick = { navController.navigate(REQUESTS_SCREEN) }
     ) {
         Text(
@@ -85,8 +82,7 @@ fun ToUploadButton(navController: NavController) {
     Button(
         modifier = Modifier
             .fillMaxHeight(0.25f)
-            .fillMaxWidth(0.8f)
-        ,
+            .fillMaxWidth(0.8f),
         onClick = { navController.navigate(UPLOAD_SCREEN) }
     ) {
         Text(
@@ -100,9 +96,8 @@ fun ToUploadButton(navController: NavController) {
 fun ToSettingsButton(navController: NavController) {
     Button(
         modifier = Modifier
-            .fillMaxHeight(0.3f)
-            .fillMaxWidth(0.8f)
-        ,
+            .fillMaxHeight(0.35f)
+            .fillMaxWidth(0.8f),
         onClick = { navController.navigate(SETTINGS_SCREEN) }
     ) {
         Text(
