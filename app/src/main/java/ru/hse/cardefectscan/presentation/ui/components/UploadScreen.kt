@@ -16,5 +16,5 @@ fun UploadScreen() {
 )
 @Composable
 fun UploadScreenPreview() {
-
+    UploadScreen()
 }

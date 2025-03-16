@@ -16,5 +16,5 @@ fun ResultScreen() {
 )
 @Composable
 fun ResultScreenPreview() {
-
+    ResultScreen()
 }

@@ -16,5 +16,5 @@ fun LoginScreen() {
 )
 @Composable
 fun LoginScreenPreview() {
-
+    LoginScreen()
 }

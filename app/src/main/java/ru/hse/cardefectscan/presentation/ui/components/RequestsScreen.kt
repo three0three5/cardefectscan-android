@@ -16,5 +16,5 @@ fun RequestsScreen() {
 )
 @Composable
 fun RequestsScreenPreview() {
-
+    RequestsScreen()
 }

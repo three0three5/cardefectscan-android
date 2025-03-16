@@ -16,5 +16,5 @@ fun SettingsScreen() {
 )
 @Composable
 fun SettingsScreenPreview() {
-
+    SettingsScreen()
 }
