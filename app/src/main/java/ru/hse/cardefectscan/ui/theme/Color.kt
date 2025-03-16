@@ -1,11 +1,31 @@
 package ru.hse.cardefectscan.ui.theme
 
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF312547),
+    secondary = Color(0xFF5E3A93),
+    tertiary = Color(0xFF461E55),
+    background = Color(0xFF150C28),
+    surface = Color(0xFF2D1E36),
+    onPrimary = Color(0xFF0D1E2B),
+    onSecondary = Color(0x94251332),
+    onTertiary = Color(0xFF400B3B),
+    onBackground = Color(0xFF48254C),
+    onSurface = Color(0xFF0F1B40),
+)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF6650a4),
+    secondary = Color(0xFF625b71),
+    tertiary = Color(0xFF7D5260),
+    background = Color(0xFFC2ADEA),
+    surface = Color(0xFFCC91F8),
+    onPrimary = Color(0xFFFFFFFF),
+    onSecondary = Color(0xFFFFFFFF),
+    onTertiary = Color(0xFFFFFFFF),
+    onBackground = Color(0xFFF2D0F8),
+    onSurface = Color(0xFFFFD8E7),
+)
