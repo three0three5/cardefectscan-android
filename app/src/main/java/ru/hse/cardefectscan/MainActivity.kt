@@ -7,6 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.hse.cardefectscan.presentation.ui.components.HomeScreen
+import ru.hse.cardefectscan.presentation.ui.components.LoginScreen
+import ru.hse.cardefectscan.presentation.ui.components.RequestsScreen
+import ru.hse.cardefectscan.presentation.ui.components.ResultScreen
+import ru.hse.cardefectscan.presentation.ui.components.SettingsScreen
+import ru.hse.cardefectscan.presentation.ui.components.UploadScreen
 import ru.hse.cardefectscan.presentation.ui.theme.CarDefectScanTheme
 import ru.hse.cardefectscan.utils.HOME_SCREEN
 import ru.hse.cardefectscan.utils.LOGIN_SCREEN

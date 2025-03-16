@@ -5,7 +5,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ResultsScreen() {
+fun ResultScreen() {
 
 }
 
@@ -15,6 +15,6 @@ fun ResultsScreen() {
     device = Devices.PIXEL,
 )
 @Composable
-fun ResultsScreenPreview() {
+fun ResultScreenPreview() {
 
 }
