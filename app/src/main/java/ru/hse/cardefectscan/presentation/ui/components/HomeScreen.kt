@@ -20,8 +20,11 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import ru.hse.cardefectscan.presentation.viewmodel.HomeViewModel
+import ru.hse.cardefectscan.utils.LOGIN_SCREEN
 import ru.hse.cardefectscan.utils.REQUESTS_SCREEN
 import ru.hse.cardefectscan.utils.SETTINGS_SCREEN
 import ru.hse.cardefectscan.utils.TO_REQUESTS_SCREEN
@@ -30,8 +33,21 @@ import ru.hse.cardefectscan.utils.TO_UPLOAD_SCREEN
 import ru.hse.cardefectscan.utils.UPLOAD_SCREEN
 
 @Composable
-fun HomeScreen(navController: NavController) {
-    // TODO - if no token then navigate to login screen
+fun HomeScreen(
+    navController: NavController,
+    vm: HomeViewModel = viewModel(),
+) {
+    if (!vm.isAuthenticated()) {
+        navController.navigate(LOGIN_SCREEN)
+    } else {
+        HomeScaffold(navController)
+    }
+}
+
+@Composable
+fun HomeScaffold(
+    navController: NavController
+) {
     Scaffold { innerPadding ->
         val topPadding = LocalConfiguration.current.screenHeightDp.dp * 0.1f
         Box(

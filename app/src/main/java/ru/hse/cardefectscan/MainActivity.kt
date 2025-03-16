@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                 val startDestination = HOME_SCREEN
                 NavHost(navController = navController, startDestination = startDestination) {
                     composable(HOME_SCREEN) { HomeScreen(navController) }
-                    composable(LOGIN_SCREEN) { LoginScreen() }
+                    composable(LOGIN_SCREEN) { LoginScreen(navController) }
                     composable(REQUESTS_SCREEN) { RequestsScreen() }
                     composable(RESULT_SCREEN) { ResultScreen() }
                     composable(SETTINGS_SCREEN) { SettingsScreen() }

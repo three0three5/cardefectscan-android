@@ -1,24 +1,219 @@
 package ru.hse.cardefectscan.presentation.ui.components
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import ru.hse.cardefectscan.presentation.viewmodel.LoginViewModel
+import ru.hse.cardefectscan.utils.ENTER_ADDITIONAL_PASSWORD_LABEL
+import ru.hse.cardefectscan.utils.ENTER_LOGIN_LABEL
+import ru.hse.cardefectscan.utils.ENTER_LOGIN_PLACEHOLDER
+import ru.hse.cardefectscan.utils.ENTER_PASSWORD_LABEL
+import ru.hse.cardefectscan.utils.ENTER_PASSWORD_PLACEHOLDER
+import ru.hse.cardefectscan.utils.HOME_SCREEN
+import ru.hse.cardefectscan.utils.LOGIN_BUTTON
+import ru.hse.cardefectscan.utils.LOGIN_LABEL
+import ru.hse.cardefectscan.utils.LOGIN_MODE_BUTTON
+import ru.hse.cardefectscan.utils.SIGNUP_BUTTON
+import ru.hse.cardefectscan.utils.SIGNUP_LABEL
+import ru.hse.cardefectscan.utils.SIGNUP_MODE_BUTTON
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
     Scaffold { innerPadding ->
-        Text(
-            "TODO",
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(innerPadding),
-            style = MaterialTheme.typography.titleLarge
-        )
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            LoginElements(navController)
+        }
     }
+}
+
+@Composable
+fun LoginElements(
+    navController: NavController,
+    vm: LoginViewModel = viewModel(),
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        val label = if (vm.isLogin) LOGIN_LABEL else SIGNUP_LABEL
+        TitleLabel(label)
+        LoginField(vm)
+        PasswordField(vm)
+        WithAnimation(vm, false) {
+            AdditionalPasswordField(vm)
+        }
+        if (vm.isLogin) {
+            LoginButton(vm, navController)
+            SignupModeButton(vm)
+        } else {
+            SignupButton(vm, navController)
+            LoginModeButton(vm)
+        }
+    }
+}
+
+@Composable
+fun WithAnimation(
+    vm: LoginViewModel,
+    onLogin: Boolean,
+    content: @Composable (vm: LoginViewModel) -> Unit,
+) {
+    AnimatedVisibility(
+        visible = vm.isLogin == onLogin,
+        enter = fadeIn(tween(durationMillis = 500)),
+        exit = fadeOut(tween(durationMillis = 500))
+    ) {
+        content(vm)
+    }
+}
+
+@Composable
+fun LoginModeButton(vm: LoginViewModel) {
+    Button(
+        onClick = {
+            vm.toggleLoginMode()
+        },
+        modifier = Modifier
+            .fillMaxHeight(0.18f)
+            .fillMaxWidth(0.6f),
+    ) {
+        Text(LOGIN_MODE_BUTTON)
+    }
+}
+
+@Composable
+fun SignupButton(vm: LoginViewModel, navController: NavController) {
+    Button(
+        onClick = {
+            vm.signup()
+            navController.navigate(HOME_SCREEN)
+        },
+        modifier = Modifier
+            .fillMaxHeight(0.18f)
+            .fillMaxWidth(0.45f),
+    ) {
+        Text(SIGNUP_BUTTON)
+    }
+}
+
+@Composable
+fun AdditionalPasswordField(vm: LoginViewModel) {
+    OutlinedTextField(
+        value = vm.additionalPassword,
+        onValueChange = { vm.additionalPassword = it },
+        label = { Text(ENTER_ADDITIONAL_PASSWORD_LABEL) },
+        visualTransformation = PasswordVisualTransformation(),
+        placeholder = {
+            Text(
+                ENTER_PASSWORD_PLACEHOLDER,
+                color = Color.Gray.copy(alpha = 0.5f)
+            )
+        },
+    )
+}
+
+@Composable
+fun SignupModeButton(vm: LoginViewModel) {
+    Button(
+        onClick = {
+            vm.toggleLoginMode()
+        },
+        modifier = Modifier
+            .fillMaxHeight(0.14f)
+            .fillMaxWidth(0.4f),
+    ) {
+        Text(SIGNUP_MODE_BUTTON)
+    }
+}
+
+@Composable
+fun LoginButton(
+    vm: LoginViewModel,
+    navController: NavController,
+) {
+    Button(
+        onClick = {
+            vm.login()
+            navController.navigate(HOME_SCREEN)
+        },
+        modifier = Modifier
+            .fillMaxHeight(0.1f)
+            .fillMaxWidth(0.4f),
+    ) {
+        Log.i("LoginScreen", "Entered login ${vm.login} and password ${vm.password}")
+        Text(LOGIN_BUTTON)
+    }
+}
+
+@Composable
+fun PasswordField(vm: LoginViewModel) {
+    OutlinedTextField(
+        value = vm.password,
+        onValueChange = { vm.password = it },
+        label = { Text(ENTER_PASSWORD_LABEL) },
+        visualTransformation = PasswordVisualTransformation(),
+        placeholder = {
+            Text(
+                ENTER_PASSWORD_PLACEHOLDER,
+                color = Color.Gray.copy(alpha = 0.5f)
+            )
+        },
+    )
+}
+
+@Composable
+fun LoginField(vm: LoginViewModel) {
+    OutlinedTextField(
+        vm.login,
+        onValueChange = {
+            vm.login = it
+        },
+        label = { Text(ENTER_LOGIN_LABEL) },
+        placeholder = {
+            Text(
+                ENTER_LOGIN_PLACEHOLDER,
+                color = Color.Gray.copy(alpha = 0.5f),
+            )
+        }
+    )
+}
+
+@Composable
+fun TitleLabel(label: String) {
+    Text(
+        label,
+        style = MaterialTheme.typography.titleLarge
+    )
 }
 
 @Preview(
@@ -28,5 +223,5 @@ fun LoginScreen() {
 )
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen()
+    LoginScreen(rememberNavController())
 }
