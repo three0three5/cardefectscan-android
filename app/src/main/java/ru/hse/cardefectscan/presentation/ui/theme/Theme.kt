@@ -1,4 +1,4 @@
-package ru.hse.cardefectscan.ui.theme
+package ru.hse.cardefectscan.presentation.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
