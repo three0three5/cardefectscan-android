@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -35,7 +36,7 @@ import ru.hse.cardefectscan.utils.UPLOAD_SCREEN
 @Composable
 fun HomeScreen(
     navController: NavController,
-    vm: HomeViewModel = viewModel(),
+    vm: HomeViewModel = hiltViewModel(),
 ) {
     if (!vm.isAuthenticated()) {
         navController.navigate(LOGIN_SCREEN)

@@ -1,5 +1,6 @@
 package ru.hse.cardefectscan
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import ru.hse.cardefectscan.presentation.ui.components.HomeScreen
 import ru.hse.cardefectscan.presentation.ui.components.LoginScreen
 import ru.hse.cardefectscan.presentation.ui.components.RequestsScreen
@@ -21,6 +24,10 @@ import ru.hse.cardefectscan.utils.RESULT_SCREEN
 import ru.hse.cardefectscan.utils.SETTINGS_SCREEN
 import ru.hse.cardefectscan.utils.UPLOAD_SCREEN
 
+@HiltAndroidApp
+class CarDefectScanApplication: Application()
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

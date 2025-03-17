@@ -25,7 +25,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import ru.hse.cardefectscan.presentation.viewmodel.LoginViewModel
@@ -59,7 +59,7 @@ fun LoginScreen(navController: NavController) {
 @Composable
 fun LoginElements(
     navController: NavController,
-    vm: LoginViewModel = viewModel(),
+    vm: LoginViewModel = hiltViewModel(),
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -170,7 +170,7 @@ fun LoginButton(
             .fillMaxHeight(0.1f)
             .fillMaxWidth(0.4f),
     ) {
-        Log.i("LoginScreen", "Entered login ${vm.login} and password ${vm.password}")
+        Log.d("LoginScreen", "Entered login ${vm.login} and password ${vm.password}")
         Text(LOGIN_BUTTON)
     }
 }

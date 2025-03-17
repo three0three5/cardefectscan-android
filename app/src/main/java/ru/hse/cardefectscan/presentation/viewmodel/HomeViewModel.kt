@@ -1,9 +1,15 @@
 package ru.hse.cardefectscan.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import ru.hse.cardefectscan.domain.usecase.AuthUseCase
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val authUseCase: AuthUseCase,
+) : ViewModel() {
     fun isAuthenticated():Boolean {
-        return true // TODO
+        return authUseCase.isAuthenticated()
     }
 }
