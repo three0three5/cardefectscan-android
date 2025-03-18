@@ -20,6 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import ru.hse.cardefectscan.presentation.viewmodel.CommonViewModel
 import ru.hse.cardefectscan.presentation.viewmodel.LoginViewModel
 import ru.hse.cardefectscan.utils.ENTER_ADDITIONAL_PASSWORD_LABEL
 import ru.hse.cardefectscan.utils.ENTER_LOGIN_LABEL
@@ -68,10 +72,11 @@ fun LoginElements(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         val label = if (vm.isLogin) LOGIN_LABEL else SIGNUP_LABEL
+
         TitleLabel(label)
         LoginField(vm)
         PasswordField(vm)
-        WithAnimation(vm, false) {
+        WithAnimation(vm, !vm.isLogin) {
             AdditionalPasswordField(vm)
         }
         if (vm.isLogin) {
@@ -84,17 +89,20 @@ fun LoginElements(
         if (vm.isLoading) {
             CircularProgressIndicator()
         }
+        WithAnimation(vm, vm.displayMessage) {
+            Text(vm.exceptionMessage, color = Color.Red)
+        }
     }
 }
 
 @Composable
 fun WithAnimation(
-    vm: LoginViewModel,
-    onLogin: Boolean,
-    content: @Composable (vm: LoginViewModel) -> Unit,
+    vm: CommonViewModel?,
+    isVisible: Boolean,
+    content: @Composable (vm: CommonViewModel?) -> Unit,
 ) {
     AnimatedVisibility(
-        visible = vm.isLogin == onLogin,
+        visible = isVisible,
         enter = fadeIn(tween(durationMillis = 500)),
         exit = fadeOut(tween(durationMillis = 500))
     ) {
@@ -124,7 +132,12 @@ fun SignupButton(vm: LoginViewModel, navController: NavController) {
             Log.d("LoginScreen", "Launch signup effect")
             vm.signup()
             vm.isLoading = false
-            navController.navigate(HOME_SCREEN)
+            if (vm.exceptionMessage == "") {
+                Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                navController.navigate(HOME_SCREEN)
+            } else {
+                Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+            }
         }
     }
 
@@ -182,7 +195,12 @@ fun LoginButton(
             Log.d("LoginScreen", "Launch login effect")
             vm.login()
             vm.isLoading = false
-            navController.navigate(HOME_SCREEN)
+            if (vm.exceptionMessage == "") {
+                Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                navController.navigate(HOME_SCREEN)
+            } else {
+                Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+            }
         }
     }
 

@@ -11,10 +11,12 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
-) : ViewModel() {
+) : CommonViewModel() {
     var isLoading by mutableStateOf(false)
 
     suspend fun logout() {
-        authUseCase.logout()
+        runCatchingWithHandling {
+            authUseCase.logout()
+        }
     }
 }

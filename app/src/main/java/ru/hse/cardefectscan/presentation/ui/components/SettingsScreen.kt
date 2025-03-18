@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,9 @@ fun SettingsScreen(
                 if (vm.isLoading) {
                     CircularProgressIndicator()
                 }
+                WithAnimation(vm, vm.displayMessage) {
+                    Text(vm.exceptionMessage, color = Color.Red)
+                }
             }
         }
     }
@@ -66,7 +70,7 @@ fun LogoutButton(
             Log.d("SettingsScreen", "Launched effect")
             vm.logout()
             vm.isLoading = false
-            navController.navigate(LOGIN_SCREEN)
+            if (vm.exceptionMessage == "") navController.navigate(LOGIN_SCREEN)
         }
     }
     Button(
