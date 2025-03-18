@@ -24,6 +24,7 @@ open class CommonViewModel : ViewModel() {
     var displayMessage by mutableStateOf(false)
 
     suspend fun <T> runCatchingWithHandling(block: suspend () -> T): T? {
+        messageJob?.cancel()
         exceptionMessage = ""
         displayMessage = false
         val result = runCatching {
@@ -54,7 +55,6 @@ open class CommonViewModel : ViewModel() {
                 }
                 else -> throw throwable
             }
-            messageJob?.cancel()
             messageJob = viewModelScope.launch {
                 Log.d("CommonViewModel", "Display error message: $exceptionMessage")
                 displayMessage = true
