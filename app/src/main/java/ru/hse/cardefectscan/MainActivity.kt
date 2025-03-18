@@ -3,6 +3,7 @@ package ru.hse.cardefectscan
 import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
@@ -37,11 +38,17 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val startDestination = HOME_SCREEN
                 NavHost(navController = navController, startDestination = startDestination) {
-                    composable(HOME_SCREEN) { HomeScreen(navController) }
+                    composable(HOME_SCREEN) {
+                        BackHandler {
+                            finish()
+                        }
+
+                        HomeScreen(navController)
+                    }
                     composable(LOGIN_SCREEN) { LoginScreen(navController) }
                     composable(REQUESTS_SCREEN) { RequestsScreen() }
                     composable(RESULT_SCREEN) { ResultScreen() }
-                    composable(SETTINGS_SCREEN) { SettingsScreen() }
+                    composable(SETTINGS_SCREEN) { SettingsScreen(navController) }
                     composable(UPLOAD_SCREEN) { UploadScreen() }
                 }
             }

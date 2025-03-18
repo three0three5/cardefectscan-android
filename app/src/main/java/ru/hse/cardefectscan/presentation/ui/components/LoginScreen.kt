@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -79,6 +81,9 @@ fun LoginElements(
             SignupButton(vm, navController)
             LoginModeButton(vm)
         }
+        if (vm.isLoading) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -101,6 +106,7 @@ fun WithAnimation(
 fun LoginModeButton(vm: LoginViewModel) {
     Button(
         onClick = {
+            if (vm.isLoading) return@Button
             vm.toggleLoginMode()
         },
         modifier = Modifier
@@ -113,10 +119,19 @@ fun LoginModeButton(vm: LoginViewModel) {
 
 @Composable
 fun SignupButton(vm: LoginViewModel, navController: NavController) {
+    LaunchedEffect(vm.isLoading) {
+        if (vm.isLoading) {
+            Log.d("LoginScreen", "Launch signup effect")
+            vm.signup()
+            vm.isLoading = false
+            navController.navigate(HOME_SCREEN)
+        }
+    }
+
     Button(
         onClick = {
-            vm.signup()
-            navController.navigate(HOME_SCREEN)
+            if (vm.isLoading) return@Button
+            vm.isLoading = true
         },
         modifier = Modifier
             .fillMaxHeight(0.18f)
@@ -146,6 +161,7 @@ fun AdditionalPasswordField(vm: LoginViewModel) {
 fun SignupModeButton(vm: LoginViewModel) {
     Button(
         onClick = {
+            if (vm.isLoading) return@Button
             vm.toggleLoginMode()
         },
         modifier = Modifier
@@ -161,10 +177,19 @@ fun LoginButton(
     vm: LoginViewModel,
     navController: NavController,
 ) {
+    LaunchedEffect(vm.isLoading) {
+        if (vm.isLoading) {
+            Log.d("LoginScreen", "Launch login effect")
+            vm.login()
+            vm.isLoading = false
+            navController.navigate(HOME_SCREEN)
+        }
+    }
+
     Button(
         onClick = {
-            vm.login()
-            navController.navigate(HOME_SCREEN)
+            if (vm.isLoading) return@Button
+            vm.isLoading = true
         },
         modifier = Modifier
             .fillMaxHeight(0.1f)

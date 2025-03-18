@@ -7,9 +7,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
-import okhttp3.CookieJar
 import okhttp3.OkHttpClient
-import ru.hse.cardefectscan.data.local.TokenCookieJar
+import ru.hse.cardefectscan.data.local.SimpleCookieJar
+import ru.hse.cardefectscan.data.remote.LoggingInterceptor
+import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.utils.SERVER_BASE_URL
 import ru.hse.generated.apis.AuthApi
 import java.io.File
@@ -30,15 +31,20 @@ class NetworkModule {
 
     @Provides
     fun provideCookieJar(
-    ): CookieJar = TokenCookieJar()
+        authRepository: AuthRepository,
+    ): okhttp3.CookieJar = SimpleCookieJar(
+        handlers = listOf(authRepository),
+        persistentCookiesProvider = authRepository,
+    )
 
     @Provides
     fun provideClient(
-        cookieJar: CookieJar,
+        cookieJar: okhttp3.CookieJar,
         cache: Cache,
     ): OkHttpClient = OkHttpClient.Builder()
         .cookieJar(cookieJar)
         .cache(cache)
+        .addInterceptor(LoggingInterceptor())
         .build()
 
     @Provides

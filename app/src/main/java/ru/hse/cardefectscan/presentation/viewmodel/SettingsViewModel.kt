@@ -9,24 +9,12 @@ import ru.hse.cardefectscan.domain.usecase.AuthUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class SettingsViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
 ) : ViewModel() {
-    var isLogin by mutableStateOf(true)
-    var login by mutableStateOf("")
-    var password by mutableStateOf("")
-    var additionalPassword by mutableStateOf("")
     var isLoading by mutableStateOf(false)
 
-    suspend fun signup() {
-        // TODO
-    }
-
-    suspend fun login() {
-        authUseCase.login(login, password)
-    }
-
-    fun toggleLoginMode() {
-        isLogin = !isLogin
+    suspend fun logout() {
+        authUseCase.logout()
     }
 }

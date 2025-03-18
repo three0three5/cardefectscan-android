@@ -58,13 +58,13 @@ fun HomeScaffold(
                 .fillMaxHeight(0.8f),
             contentAlignment = Alignment.Center
         ) {
-            ButtonSet(navController)
+            HomeButtonSet(navController)
         }
     }
 }
 
 @Composable
-fun ButtonSet(navController: NavController) {
+fun HomeButtonSet(navController: NavController) {
     val startPadding = LocalConfiguration.current.screenWidthDp.dp * 0.1f
     Column(
         modifier = Modifier

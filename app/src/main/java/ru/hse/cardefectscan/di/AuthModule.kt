@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.domain.usecase.AuthUseCase
+import ru.hse.generated.apis.AuthApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -22,7 +23,9 @@ class AuthModule {
     @Provides
     fun provideAuthUseCase(
         authRepository: AuthRepository,
+        authClient: AuthApi,
     ): AuthUseCase = AuthUseCase(
-        authRepository
+        authRepository,
+        authClient,
     )
 }
