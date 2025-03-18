@@ -24,6 +24,8 @@ open class CommonViewModel : ViewModel() {
     var displayMessage by mutableStateOf(false)
 
     suspend fun <T> runCatchingWithHandling(block: suspend () -> T): T? {
+        exceptionMessage = ""
+        displayMessage = false
         val result = runCatching {
             block.invoke()
         }
