@@ -13,13 +13,23 @@ class TokenInterceptor @Inject constructor(
     private val authUseCase: AuthUseCase,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val response = makeRequest(chain, authRepository.jwtToken)
-        if (response.code != 401) return response
-        runBlocking {
-            Log.d("TokenInterceptor", "try to refresh in runBlocking")
-            authUseCase.refresh()
+        val token = authRepository.jwtToken
+        var response = makeRequest(chain, token)
+
+        if (response.code == 401) {
+            authRepository.jwtToken = ""
+            response.close()
+            synchronized(this) {
+                if (authRepository.jwtToken == "") {
+                    runBlocking {
+                        Log.d("TokenInterceptor", "Refreshing token")
+                        authUseCase.refresh()
+                    }
+                }
+            }
+            response = makeRequest(chain, authRepository.jwtToken)
         }
-        return makeRequest(chain, authRepository.jwtToken)
+        return response
     }
 
     private fun makeRequest(chain: Interceptor.Chain, token: String): Response {
@@ -34,7 +44,7 @@ class TokenInterceptor @Inject constructor(
     }
 
     companion object {
-        const val BEARER_PREFIX = "Bearer "
-        const val AUTHORIZATION_HEADER = "Authorization"
+        private const val BEARER_PREFIX = "Bearer "
+        private const val AUTHORIZATION_HEADER = "Authorization"
     }
 }

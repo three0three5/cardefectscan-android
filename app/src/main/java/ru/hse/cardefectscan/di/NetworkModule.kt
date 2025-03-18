@@ -11,11 +11,8 @@ import okhttp3.CookieJar
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import ru.hse.cardefectscan.data.local.SimpleCookieJar
-import ru.hse.cardefectscan.data.remote.ExceptionHandlerInterceptor
-import ru.hse.cardefectscan.data.remote.LoggingInterceptor
 import ru.hse.cardefectscan.data.remote.TokenInterceptor
 import ru.hse.cardefectscan.domain.repository.AuthRepository
-import ru.hse.cardefectscan.domain.usecase.AuthUseCase
 import ru.hse.cardefectscan.utils.SERVER_BASE_URL
 import ru.hse.generated.apis.AuthApi
 import java.io.File
@@ -38,7 +35,7 @@ class NetworkModule {
     @Provides
     fun provideCookieJar(
         authRepository: AuthRepository,
-    ): okhttp3.CookieJar = SimpleCookieJar(
+    ): CookieJar = SimpleCookieJar(
         handlers = listOf(authRepository),
         persistentCookiesProvider = authRepository,
     )
