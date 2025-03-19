@@ -8,7 +8,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
 ) : CommonViewModel() {
-    fun isAuthenticated():Boolean {
+    fun isAuthenticated(): Boolean {
         return authUseCase.isAuthenticated()
     }
 }

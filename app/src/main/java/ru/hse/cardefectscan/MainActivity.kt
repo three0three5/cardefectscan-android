@@ -26,7 +26,7 @@ import ru.hse.cardefectscan.utils.SETTINGS_SCREEN
 import ru.hse.cardefectscan.utils.UPLOAD_SCREEN
 
 @HiltAndroidApp
-class CarDefectScanApplication: Application()
+class CarDefectScanApplication : Application()
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -35,8 +35,8 @@ fun SettingsScreen(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
+                .padding(innerPadding)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -50,7 +50,7 @@ fun SettingsScreen(
                 if (vm.isLoading) {
                     CircularProgressIndicator()
                 }
-                WithAnimation(vm, vm.displayMessage) {
+                WithAnimation(vm.displayMessage) {
                     Text(vm.exceptionMessage, color = Color.Red)
                 }
             }

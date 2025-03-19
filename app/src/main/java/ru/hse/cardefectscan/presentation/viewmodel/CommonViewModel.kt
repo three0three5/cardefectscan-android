@@ -18,7 +18,7 @@ import ru.hse.generated.infrastructure.ClientException
 import ru.hse.generated.infrastructure.ServerError
 import ru.hse.generated.infrastructure.ServerException
 
-open class CommonViewModel : ViewModel() {
+abstract class CommonViewModel : ViewModel() {
     private var messageJob: Job? = null
     var exceptionMessage by mutableStateOf("")
     var displayMessage by mutableStateOf(false)
@@ -33,9 +33,13 @@ open class CommonViewModel : ViewModel() {
         if (result.isFailure) {
             when (val throwable = result.exceptionOrNull()!!) {
                 is CommonException -> {
-                    Log.w("CommonViewModel", "Handled exception: $throwable with cause ${throwable.cause}")
+                    Log.w(
+                        "CommonViewModel",
+                        "Handled exception: $throwable with cause ${throwable.cause}"
+                    )
                     exceptionMessage = throwable.message?.notBlank() ?: UNKNOWN_EXCEPTION
                 }
+
                 is ClientException -> {
                     Log.d("CommonViewModel", "Client exception: ${throwable.message}")
 
@@ -45,6 +49,7 @@ open class CommonViewModel : ViewModel() {
 
                     exceptionMessage = extractDetails(responseBody)
                 }
+
                 is ServerException -> {
                     Log.d("CommonViewModel", "Server exception: ${throwable.message}")
                     val error = throwable.response as? ServerError<*>
@@ -53,6 +58,7 @@ open class CommonViewModel : ViewModel() {
 
                     exceptionMessage = extractDetails(responseBody)
                 }
+
                 else -> throw throwable
             }
             messageJob = viewModelScope.launch {

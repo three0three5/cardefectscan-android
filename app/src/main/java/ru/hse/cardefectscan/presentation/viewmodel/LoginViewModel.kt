@@ -24,7 +24,7 @@ class LoginViewModel @Inject constructor(
     }
 
     suspend fun login() {
-        runCatchingWithHandling { 
+        runCatchingWithHandling {
             authUseCase.login(login, password)
         }
     }

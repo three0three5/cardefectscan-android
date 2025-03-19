@@ -15,8 +15,10 @@ moshi = "1.15.2"
 dagger = "2.55"
 hiltNavigation = "1.2.0"
 kapt = "2.1.10"
+coil = "3.1.0"
 
 [libraries]
+coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
 dagger = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "dagger" }

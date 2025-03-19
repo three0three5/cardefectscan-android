@@ -63,6 +63,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil)
     implementation(libs.hilt.navigation)
     implementation(libs.dagger)
     implementation(libs.hilt.android)

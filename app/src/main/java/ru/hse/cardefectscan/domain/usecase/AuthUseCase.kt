@@ -16,7 +16,10 @@ class AuthUseCase(
     fun isAuthenticated(): Boolean {
         val token = authRepository.getRefreshToken() ?: return false
         val expiration = token.cookie.expiresAt
-        Log.d("AuthUseCase", "returning ${System.currentTimeMillis() < expiration} for isAuthenticated")
+        Log.d(
+            "AuthUseCase",
+            "returning ${System.currentTimeMillis() < expiration} for isAuthenticated"
+        )
         return System.currentTimeMillis() < expiration
     }
 
@@ -38,7 +41,7 @@ class AuthUseCase(
         authRepository.jwtToken = tokenResponse.accessToken
     }
 
-   suspend fun refresh() {
+    suspend fun refresh() {
         Log.d("AuthUseCase", "Refreshing token")
         val tokenResponse = withContext(Dispatchers.IO) {
             authApi.apiV1AuthRefreshPost()
@@ -50,10 +53,12 @@ class AuthUseCase(
     suspend fun signup(login: String, password: String, additionalPassword: String) {
         if (password != additionalPassword) throw PasswordsNotMatchException()
         val tokenResponse = withContext(Dispatchers.IO) {
-            authApi.apiV1AuthSignupPost(SignupRequest(
-                username = login,
-                password = password,
-            ))
+            authApi.apiV1AuthSignupPost(
+                SignupRequest(
+                    username = login,
+                    password = password,
+                )
+            )
         }
         Log.d("AuthUseCase", "received response $tokenResponse")
         authRepository.jwtToken = tokenResponse.accessToken

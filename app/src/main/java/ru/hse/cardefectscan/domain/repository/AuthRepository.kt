@@ -11,7 +11,7 @@ import ru.hse.generated.infrastructure.Serializer
 
 class AuthRepository(
     context: Context,
-): PersistentCookiesProvider, CookieHandler {
+) : PersistentCookiesProvider, CookieHandler {
     private val prefs = context.getSharedPreferences(AUTH_PREFS, Context.MODE_PRIVATE)
     var jwtToken = ""
 
@@ -34,10 +34,12 @@ class AuthRepository(
             it.name == TOKEN_LABEL
         }.getOrNull(0) ?: return
         Log.d("AuthRepository", "save $cookie")
-        saveRefreshToken(CookieWithUrl(
-            url = url,
-            cookie = cookie,
-        ))
+        saveRefreshToken(
+            CookieWithUrl(
+                url = url,
+                cookie = cookie,
+            )
+        )
     }
 
     fun clear() {

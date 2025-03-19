@@ -1,10 +1,6 @@
 package ru.hse.cardefectscan.presentation.ui.components
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import ru.hse.cardefectscan.presentation.viewmodel.CommonViewModel
 import ru.hse.cardefectscan.presentation.viewmodel.LoginViewModel
 import ru.hse.cardefectscan.utils.ENTER_ADDITIONAL_PASSWORD_LABEL
 import ru.hse.cardefectscan.utils.ENTER_LOGIN_LABEL
@@ -73,7 +68,7 @@ fun LoginElements(
         TitleLabel(label)
         LoginField(vm)
         PasswordField(vm)
-        WithAnimation(vm, !vm.isLogin) {
+        WithAnimation(!vm.isLogin) {
             AdditionalPasswordField(vm)
         }
         if (vm.isLogin) {
@@ -86,24 +81,7 @@ fun LoginElements(
         if (vm.isLoading) {
             CircularProgressIndicator()
         }
-        WithAnimation(vm, vm.displayMessage) {
-            Text(vm.exceptionMessage, color = Color.Red)
-        }
-    }
-}
-
-@Composable
-fun WithAnimation(
-    vm: CommonViewModel?,
-    isVisible: Boolean,
-    content: @Composable (vm: CommonViewModel?) -> Unit,
-) {
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(tween(durationMillis = 500)),
-        exit = fadeOut(tween(durationMillis = 500))
-    ) {
-        content(vm)
+        DisplayMessage(vm)
     }
 }
 
