@@ -1,0 +1,478 @@
+openapi: 3.0.2
+servers:
+  - url: http://localhost:8080
+  - url: https://localhost/backend
+info:
+  description: CarDefectScan API
+  version: 0.1.0
+  title: CarDefectScan - OpenAPI 3.0
+tags:
+  - name: Auth
+    description: Operations with user account
+  - name: Images
+    description: Operations with images
+  - name: Requests
+    description: Operations with processed (or currently being in process) images
+
+paths:
+  /api/v1/requests/{imageId}:
+    get:
+      tags:
+        - Requests
+      summary: Get detailed info of the request
+      parameters:
+        - name: imageId
+          in: path
+          description: identifier of the request
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detailed request info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageRequestDetailed"
+        "404":
+          description: Image not found
+
+  /api/v1/requests:
+    get:
+      tags:
+        - Requests
+      summary: Get paginated list of requests
+      parameters:
+        - name: page
+          in: query
+          description: Page number (zero based)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Number of elements per page
+          required: false
+          schema:
+            type: integer
+            default: 5
+      responses:
+        "200":
+          description: Paginated list of image requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageRequestResponse"
+
+  /api/v1/images/{folder}/{imageName}:
+    get:
+      tags:
+        - Images
+      summary: "Download file"
+      description: "Returns the file as a binary stream"
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: imageName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: hash
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "File downloaded successfully"
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: "File not found"
+
+  /api/v1/images/load:
+    get:
+      tags:
+        - Images
+      summary: Presigned URL
+      description: Get presigned URL for image loading
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageLink'
+
+  /api/v1/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: User Sign Up
+      description: Sign Up user and sets JWT and refresh token in cookies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        "200":
+          description: Successful signup, refresh token set in cookies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          headers:
+            Set-Cookie:
+              description: "HttpOnly Secure cookies with access and refresh tokens"
+              schema:
+                type: string
+        "400":
+          description: Non unique username or inappropriate password
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      description: Authenticates user and sets JWT and refresh token in cookies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Successful login, refresh token set in cookies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          headers:
+            Set-Cookie:
+              description: "HttpOnly Secure cookies with access and refresh tokens"
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - wrong username or password
+
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      description: Uses refresh token from cookie to generate a new access token
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "200":
+          description: New refresh token issued, set in cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          headers:
+            Set-Cookie:
+              description: "HttpOnly Secure cookie with new access token"
+              schema:
+                type: string
+        "401":
+          description: Invalid or expired refresh token
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout user
+      description: Revokes refresh token and clears cookies
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "200":
+          description: Logout successful, cookies cleared
+          headers:
+            Set-Cookie:
+              description: "Clears authentication cookies"
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+
+  schemas:
+    ImageRequestStatus:
+      type: string
+      enum:
+        - IMAGE_LOADING
+        - IMAGE_LOADED
+        - IN_PROGRESS
+        - DONE
+        - FAILED
+    ImageRequestDetailed:
+      type: object
+      required:
+        - imageId
+        - createdAt
+        - updatedAt
+        - status
+        - originalImageDownloadLink
+      properties:
+        imageId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/ImageRequestStatus"
+        originalImageDownloadLink:
+          type: string
+        resultImageDownloadLink:
+          type: string
+
+    ImageRequestElement:
+      type: object
+      required:
+        - imageId
+        - createdAt
+        - status
+      properties:
+        imageId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        thumbnailLink:
+          type: string
+        status:
+          $ref: "#/components/schemas/ImageRequestStatus"
+    PageRequestResponse:
+      type: object
+      required:
+        - content
+        - totalElements
+        - totalPages
+        - currentPage
+        - pageSize
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImageRequestElement"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+    ImageLink:
+      type: object
+      required:
+        - link
+      properties:
+        link:
+          type: string
+
+    SignupRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    TokenResponse:
+      type: object
+      required:
+        - accessToken
+      properties:
+        accessToken:
+          type: string
+
+    S3Event:
+      type: object
+      properties:
+        EventName:
+          type: string
+        Key:
+          type: string
+        Records:
+          type: array
+          items:
+            type: object
+            properties:
+              eventVersion:
+                type: string
+              eventSource:
+                type: string
+              awsRegion:
+                type: string
+              eventTime:
+                type: string
+              eventName:
+                type: string
+              userIdentity:
+                type: object
+                properties:
+                  principalId:
+                    type: string
+              requestParameters:
+                type: object
+                properties:
+                  key:
+                    type: string
+              responseElements:
+                type: object
+                properties:
+                  key:
+                    type: string
+              s3:
+                type: object
+                properties:
+                  s3SchemaVersion:
+                    type: string
+                  configurationId:
+                    type: string
+                  bucket:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      ownerIdentity:
+                        type: object
+                        properties:
+                          principalId:
+                            type: string
+                      arn:
+                        type: string
+                  object:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      size:
+                        type: number
+                      eTag:
+                        type: string
+                      contentType:
+                        type: string
+                      userMetadata:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                      versionId:
+                        type: string
+                      sequencer:
+                        type: string
+              source:
+                type: object
+                properties:
+                  host:
+                    type: string
+                  port:
+                    type: string
+                  userAgent:
+                    type: string
+
+    ResultList:
+      type: object
+      properties:
+        result:
+          type: array
+          items:
+            type: integer
+            additionalProperties:
+              $ref: "#/components/schemas/ResultMetadata"
+
+    ResultMetadata:
+      type: object
+      properties:
+        damage_level:
+          type: string
+          description: "Уровень повреждения сегмента автомобиля"
+          enum:
+            - NONE
+            - SCRATCH
+            - DENT
+            - CRACK
+            - BROKEN
+            - TOTAL_LOSS
+          example: "DENT"
+        segment_name:
+          type: string
+          description: "Название сегмента автомобиля, которое может прийти от модели. 0 всегда соответствует empty"
+          x-enum-varnames:
+            - "empty"
+            - "front_bumper"
+            - "rear_bumper"
+            - "left_door"
+            - "right_door"
+            - "hood"
+            - "trunk"
+            - "roof"
+            - "left_fender"
+            - "right_fender"
+            - "left_headlight"
+            - "right_headlight"
+            - "left_taillight"
+            - "right_taillight"
+            - "grill"
+            - "windshield"
+            - "rear_window"
+            - "side_mirror_left"
+            - "side_mirror_right"
+          example:
+            front_bumper:
+              summary: "Передний бампер"
+              value: "front_bumper"
+            hood:
+              summary: "Капот"
+              value: "hood"
+            left_door:
+              summary: "Левая дверь"
+              value: "left_door"
+      required:
+        - damage_level
+        - segment_name

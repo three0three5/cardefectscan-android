@@ -9,5 +9,5 @@ const val LOGIN_MODE_BUTTON = "Войти в существующий аккау
 const val SIGNUP_MODE_BUTTON = "Создать новый аккаунт"
 const val LOGOUT_BUTTON = "Выйти из аккаунта"
 const val LOAD_IMAGE = "Загрузить изображение"
-const val UPLOAD_IMAGE = "Отправить на обработку"
+const val UPLOAD_IMAGE = "Отправить в обработку"
 const val ANOTHER_IMAGE = "Выбрать другое изображение"

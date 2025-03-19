@@ -172,7 +172,7 @@ fun LoginButton(
     LaunchedEffect(Unit) {
         snapshotFlow { vm.isLoading }
             .collect { isLoading ->
-                if (vm.isLoading) {
+                if (isLoading) {
                     Log.d("LoginScreen", "Launch login effect")
                     vm.login()
                     vm.isLoading = false

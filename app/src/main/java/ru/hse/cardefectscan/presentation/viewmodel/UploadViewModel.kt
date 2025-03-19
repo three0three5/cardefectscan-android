@@ -13,6 +13,6 @@ class UploadViewModel @Inject constructor(
     private val imageUseCase: ImageUseCase,
 ) : CommonViewModel() {
     var imageUri by mutableStateOf<Uri?>(null)
-
-
+    var isLoading by mutableStateOf(false)
+    var loaded by mutableStateOf(false)
 }
