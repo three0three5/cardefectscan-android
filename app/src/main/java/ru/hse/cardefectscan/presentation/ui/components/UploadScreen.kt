@@ -2,7 +2,6 @@ package ru.hse.cardefectscan.presentation.ui.components
 
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,8 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ru.hse.cardefectscan.presentation.viewmodel.UploadViewModel
 import ru.hse.cardefectscan.utils.ANOTHER_IMAGE
 import ru.hse.cardefectscan.utils.CHOSEN_IMAGE
@@ -147,20 +146,8 @@ fun UploadButtons(
     vm: UploadViewModel,
     modifier: Modifier,
     launcher: ManagedActivityResultLauncher<String, Uri?>,
+    scope: CoroutineScope = rememberCoroutineScope()
 ) {
-    LaunchedEffect(Unit) {
-        snapshotFlow { vm.isLoading }
-            .collect { isLoading ->
-                if (isLoading) {
-                    Log.d("UploadScreen", "Trying to upload the image")
-                    delay(10000)
-                    Log.d("UploadScreen", "Finished uploading")
-                    vm.isLoading = false
-                    vm.loaded = true
-                }
-            }
-    }
-
     Column(
         verticalArrangement = Arrangement.spacedBy(13.dp),
         modifier = Modifier
@@ -184,7 +171,9 @@ fun UploadButtons(
             Button(
                 onClick = {
                     if (vm.isLoading || vm.loaded) return@Button
-                    vm.isLoading = true
+                    scope.launch {
+                        vm.upload()
+                    }
                 },
                 modifier = modifier
             ) {
