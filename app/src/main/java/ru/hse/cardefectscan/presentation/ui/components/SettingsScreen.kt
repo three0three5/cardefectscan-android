@@ -11,8 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,7 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ru.hse.cardefectscan.presentation.viewmodel.SettingsViewModel
 import ru.hse.cardefectscan.utils.LOGIN_SCREEN
 import ru.hse.cardefectscan.utils.LOGOUT_BUTTON
@@ -30,7 +30,8 @@ import ru.hse.cardefectscan.utils.LOGOUT_BUTTON
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    vm: SettingsViewModel = hiltViewModel()
+    vm: SettingsViewModel = hiltViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope(),
 ) {
     Scaffold { innerPadding ->
         Box(
@@ -47,6 +48,7 @@ fun SettingsScreen(
                 LogoutButton(
                     navController,
                     vm,
+                    scope,
                 )
                 if (vm.isLoading) {
                     CircularProgressIndicator()
@@ -63,24 +65,17 @@ fun SettingsScreen(
 fun LogoutButton(
     navController: NavController,
     vm: SettingsViewModel,
+    scope: CoroutineScope,
 ) {
-    LaunchedEffect(Unit) {
-        snapshotFlow { vm.isLoading }
-            .collect { isLoading ->
-                if (isLoading) {
-                    delay(10000)
-                    vm.logout()
-                    vm.isLoading = false
-                    if (vm.exceptionMessage.isBlank()) {
-                        navController.navigate(LOGIN_SCREEN)
-                    }
-                }
-            }
-    }
     Button(
         onClick = {
             if (vm.isLoading) return@Button
-            vm.isLoading = true
+            scope.launch {
+                vm.logout()
+                if (vm.exceptionMessage.isBlank()) {
+                    navController.navigate(LOGIN_SCREEN)
+                }
+            }
         }
     ) {
         Text(

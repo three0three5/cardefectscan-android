@@ -28,11 +28,13 @@ class AuthUseCase(
             Log.d("AuthUseCase", "Trying to logout")
             authApi.apiV1AuthLogoutPost()
         }
+        Log.d("AuthUseCase", "Logout processed, left IO coroutine")
         authRepository.clear()
     }
 
     suspend fun login(login: String, password: String) {
         val tokenResponse = withContext(Dispatchers.IO) {
+            Log.d("AuthUseCase", "Entered IO context")
             authApi.apiV1AuthLoginPost(
                 LoginRequest(login, password)
             )

@@ -15,8 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ru.hse.cardefectscan.presentation.viewmodel.LoginViewModel
 import ru.hse.cardefectscan.utils.ENTER_ADDITIONAL_PASSWORD_LABEL
 import ru.hse.cardefectscan.utils.ENTER_LOGIN_LABEL
@@ -102,28 +103,21 @@ fun LoginModeButton(vm: LoginViewModel) {
 }
 
 @Composable
-fun SignupButton(vm: LoginViewModel, navController: NavController) {
-    LaunchedEffect(Unit) {
-        snapshotFlow { vm.isLoading }
-            .collect { isLoading ->
-                if (isLoading) {
-                    Log.d("LoginScreen", "Launch signup effect")
-                    vm.signup()
-                    vm.isLoading = false
-                    if (vm.exceptionMessage == "") {
-                        Log.d("LoginScreen", "Exception message is empty; navigate to home")
-                        navController.navigate(HOME_SCREEN)
-                    } else {
-                        Log.d("LoginScreen", "Exception message is not empty; skip navigate")
-                    }
-                }
-            }
-    }
-
+fun SignupButton(
+    vm: LoginViewModel,
+    navController: NavController,
+    scope: CoroutineScope = rememberCoroutineScope(),
+) {
     Button(
         onClick = {
             if (vm.isLoading) return@Button
-            vm.isLoading = true
+            scope.launch {
+                vm.signup()
+                if (vm.exceptionMessage.isBlank()) {
+                    Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                    navController.navigate(HOME_SCREEN)
+                }
+            }
         },
         modifier = Modifier
             .fillMaxHeight(0.18f)
@@ -168,28 +162,19 @@ fun SignupModeButton(vm: LoginViewModel) {
 fun LoginButton(
     vm: LoginViewModel,
     navController: NavController,
+    scope: CoroutineScope = rememberCoroutineScope(),
 ) {
-    LaunchedEffect(Unit) {
-        snapshotFlow { vm.isLoading }
-            .collect { isLoading ->
-                if (isLoading) {
-                    Log.d("LoginScreen", "Launch login effect")
-                    vm.login()
-                    vm.isLoading = false
-                    if (vm.exceptionMessage == "") {
-                        Log.d("LoginScreen", "Exception message is empty; navigate to home")
-                        navController.navigate(HOME_SCREEN)
-                    } else {
-                        Log.d("LoginScreen", "Exception message is not empty; skip navigate")
-                    }
-                }
-            }
-    }
-
     Button(
         onClick = {
             if (vm.isLoading) return@Button
-            vm.isLoading = true
+            scope.launch {
+                Log.d("LoginScreen", "Launch login effect")
+                vm.login()
+                if (vm.exceptionMessage == "") {
+                    Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                    navController.navigate(HOME_SCREEN)
+                }
+            }
         },
         modifier = Modifier
             .fillMaxHeight(0.1f)
