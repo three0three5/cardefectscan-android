@@ -1,6 +1,5 @@
 package ru.hse.cardefectscan.presentation.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import ru.hse.cardefectscan.presentation.viewmodel.SettingsViewModel
 import ru.hse.cardefectscan.utils.LOGIN_SCREEN
 import ru.hse.cardefectscan.utils.LOGOUT_BUTTON
@@ -63,15 +64,18 @@ fun LogoutButton(
     navController: NavController,
     vm: SettingsViewModel,
 ) {
-    LaunchedEffect(
-        vm.isLoading
-    ) {
-        if (vm.isLoading) {
-            Log.d("SettingsScreen", "Launched effect")
-            vm.logout()
-            vm.isLoading = false
-            if (vm.exceptionMessage == "") navController.navigate(LOGIN_SCREEN)
-        }
+    LaunchedEffect(Unit) {
+        snapshotFlow { vm.isLoading }
+            .collect { isLoading ->
+                if (isLoading) {
+                    delay(10000)
+                    vm.logout()
+                    vm.isLoading = false
+                    if (vm.exceptionMessage.isBlank()) {
+                        navController.navigate(LOGIN_SCREEN)
+                    }
+                }
+            }
     }
     Button(
         onClick = {

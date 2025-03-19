@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -102,18 +103,21 @@ fun LoginModeButton(vm: LoginViewModel) {
 
 @Composable
 fun SignupButton(vm: LoginViewModel, navController: NavController) {
-    LaunchedEffect(vm.isLoading) {
-        if (vm.isLoading) {
-            Log.d("LoginScreen", "Launch signup effect")
-            vm.signup()
-            vm.isLoading = false
-            if (vm.exceptionMessage == "") {
-                Log.d("LoginScreen", "Exception message is empty; navigate to home")
-                navController.navigate(HOME_SCREEN)
-            } else {
-                Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+    LaunchedEffect(Unit) {
+        snapshotFlow { vm.isLoading }
+            .collect { isLoading ->
+                if (isLoading) {
+                    Log.d("LoginScreen", "Launch signup effect")
+                    vm.signup()
+                    vm.isLoading = false
+                    if (vm.exceptionMessage == "") {
+                        Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                        navController.navigate(HOME_SCREEN)
+                    } else {
+                        Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+                    }
+                }
             }
-        }
     }
 
     Button(
@@ -165,18 +169,21 @@ fun LoginButton(
     vm: LoginViewModel,
     navController: NavController,
 ) {
-    LaunchedEffect(vm.isLoading) {
-        if (vm.isLoading) {
-            Log.d("LoginScreen", "Launch login effect")
-            vm.login()
-            vm.isLoading = false
-            if (vm.exceptionMessage == "") {
-                Log.d("LoginScreen", "Exception message is empty; navigate to home")
-                navController.navigate(HOME_SCREEN)
-            } else {
-                Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+    LaunchedEffect(Unit) {
+        snapshotFlow { vm.isLoading }
+            .collect { isLoading ->
+                if (vm.isLoading) {
+                    Log.d("LoginScreen", "Launch login effect")
+                    vm.login()
+                    vm.isLoading = false
+                    if (vm.exceptionMessage == "") {
+                        Log.d("LoginScreen", "Exception message is empty; navigate to home")
+                        navController.navigate(HOME_SCREEN)
+                    } else {
+                        Log.d("LoginScreen", "Exception message is not empty; skip navigate")
+                    }
+                }
             }
-        }
     }
 
     Button(

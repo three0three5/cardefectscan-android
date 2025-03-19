@@ -42,10 +42,14 @@ class MainActivity : ComponentActivity() {
                         BackHandler {
                             finish()
                         }
-
                         HomeScreen(navController)
                     }
-                    composable(LOGIN_SCREEN) { LoginScreen(navController) }
+                    composable(LOGIN_SCREEN) {
+                        BackHandler {
+                            finish()
+                        }
+                        LoginScreen(navController)
+                    }
                     composable(REQUESTS_SCREEN) { RequestsScreen() }
                     composable(RESULT_SCREEN) { ResultScreen() }
                     composable(SETTINGS_SCREEN) { SettingsScreen(navController) }
