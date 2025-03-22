@@ -41,6 +41,7 @@ class AuthUseCase(
         }
         Log.d("AuthUseCase", "received response $tokenResponse")
         authRepository.jwtToken = tokenResponse.accessToken
+        Log.d("AuthUseCase", "Now authRepository.jwtToken value is ${authRepository.jwtToken}")
     }
 
     suspend fun refresh() {
@@ -50,6 +51,7 @@ class AuthUseCase(
         }
         Log.d("AuthUseCase", "Received ${tokenResponse.accessToken}")
         authRepository.jwtToken = tokenResponse.accessToken
+        Log.d("AuthUseCase", "Now authRepository.jwtToken value is ${authRepository.jwtToken}")
     }
 
     suspend fun signup(login: String, password: String, additionalPassword: String) {
@@ -64,5 +66,6 @@ class AuthUseCase(
         }
         Log.d("AuthUseCase", "received response $tokenResponse")
         authRepository.jwtToken = tokenResponse.accessToken
+        Log.d("AuthUseCase", "Now authRepository.jwtToken value is ${authRepository.jwtToken}")
     }
 }

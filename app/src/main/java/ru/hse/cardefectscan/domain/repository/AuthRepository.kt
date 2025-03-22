@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import okhttp3.Cookie
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import ru.hse.cardefectscan.data.CookieHandler
 import ru.hse.cardefectscan.data.PersistentCookiesProvider
 import ru.hse.cardefectscan.domain.model.CookieWithUrl
@@ -16,15 +17,20 @@ class AuthRepository(
     var jwtToken = ""
 
     fun getRefreshToken(): CookieWithUrl? {
-        val value = prefs.getString(TOKEN_LABEL, null) ?: return null
+        val value = prefs.getString(TOKEN_LABEL, null)
+            ?.replace(Regex("/login|/signup"), "/refresh") ?: return null
+        Log.d("AuthRepository", "got refresh to deserialize: $value")
         val cookie = Serializer.moshi.adapter(CookieWithUrl::class.java).fromJson(value)
+        Log.d("AuthRepository", "Returning cookie: $cookie")
         return cookie
     }
 
     override fun provideCookies(): MutableMap<HttpUrl, MutableList<Cookie>> {
         val token = getRefreshToken() ?: return mutableMapOf()
+        val urlForLogout = token.url.toString().replace("/refresh", "/logout").toHttpUrl()
         return mutableMapOf(
-            token.url to mutableListOf(token.cookie)
+            token.url to mutableListOf(token.cookie),
+            urlForLogout to mutableListOf(token.cookie),
         )
     }
 
@@ -49,6 +55,7 @@ class AuthRepository(
 
     private fun saveRefreshToken(token: CookieWithUrl) {
         val json = Serializer.moshi.adapter(CookieWithUrl::class.java).toJson(token)
+        Log.d("AuthRepository", "Json cookie to save: $json")
         prefs.edit()
             .putString(TOKEN_LABEL, json)
             .apply()

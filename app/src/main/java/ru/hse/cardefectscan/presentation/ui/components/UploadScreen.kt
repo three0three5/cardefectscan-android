@@ -188,7 +188,7 @@ fun UploadButtons(
             CircularProgressIndicator()
         }
 
-        WithAnimation(vm.loaded) {
+        WithAnimation(vm.loaded && vm.exceptionMessage.isBlank()) {
             Text(
                 IMAGE_HAS_BEEN_UPLOADED,
                 color = Color.Green,

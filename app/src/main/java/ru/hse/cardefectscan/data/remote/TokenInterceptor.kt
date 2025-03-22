@@ -14,6 +14,7 @@ class TokenInterceptor @Inject constructor(
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = authRepository.jwtToken
+        Log.d("TokenInterceptor", "Using jwt: $token")
         var response = makeRequest(chain, token)
 
         if (response.code == 401) {

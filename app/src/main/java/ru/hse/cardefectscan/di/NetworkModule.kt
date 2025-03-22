@@ -11,20 +11,25 @@ import okhttp3.CookieJar
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import ru.hse.cardefectscan.data.local.SimpleCookieJar
+import ru.hse.cardefectscan.data.remote.MinioClient
 import ru.hse.cardefectscan.data.remote.TokenInterceptor
 import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.utils.SERVER_BASE_URL
 import ru.hse.generated.apis.AuthApi
+import ru.hse.generated.apis.ImagesApi
 import java.io.File
 import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
     @Provides
+    @Singleton
     fun provideBaseUrl(): String = SERVER_BASE_URL
 
     @Provides
+    @Singleton
     fun provideCache(
         @ApplicationContext context: Context
     ): Cache = Cache(
@@ -33,6 +38,7 @@ class NetworkModule {
     )
 
     @Provides
+    @Singleton
     fun provideCookieJar(
         authRepository: AuthRepository,
     ): CookieJar = SimpleCookieJar(
@@ -41,8 +47,9 @@ class NetworkModule {
     )
 
     @Provides
-    @AuthOkHttpClient
-    fun provideAuthClient(
+    @DefaultOkHttpClient
+    @Singleton
+    fun provideClient(
         cookieJar: CookieJar,
         cache: Cache,
         interceptors: Set<@JvmSuppressWildcards Interceptor>,
@@ -57,8 +64,9 @@ class NetworkModule {
     }
 
     @Provides
-    @DefaultOkHttpClient
-    fun provideClient(
+    @AuthenticatedOkHttpClient
+    @Singleton
+    fun provideAuthenticatedClient(
         cookieJar: CookieJar,
         cache: Cache,
         interceptors: Set<@JvmSuppressWildcards Interceptor>,
@@ -75,12 +83,33 @@ class NetworkModule {
     }
 
     @Provides
+    @Singleton
     fun provideAuthApi(
         baseUrl: String,
-        @AuthOkHttpClient client: OkHttpClient,
+        @DefaultOkHttpClient client: OkHttpClient,
     ): AuthApi = AuthApi(
         basePath = baseUrl,
         client = client
+    )
+
+    @Provides
+    @Singleton
+    fun provideMinioClient(
+        @DefaultOkHttpClient client: OkHttpClient,
+        @ApplicationContext context: Context,
+    ): MinioClient = MinioClient(
+        client,
+        context,
+    )
+
+    @Provides
+    @Singleton
+    fun provideImagesApi(
+        baseUrl: String,
+        @AuthenticatedOkHttpClient client: OkHttpClient,
+    ): ImagesApi = ImagesApi(
+        basePath = baseUrl,
+        client = client,
     )
 
     companion object {
@@ -91,8 +120,8 @@ class NetworkModule {
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class AuthOkHttpClient
+annotation class DefaultOkHttpClient
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class DefaultOkHttpClient
+annotation class AuthenticatedOkHttpClient
