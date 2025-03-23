@@ -5,13 +5,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
-import javax.inject.Singleton
 import okhttp3.Interceptor
 import ru.hse.cardefectscan.data.remote.ExceptionHandlerInterceptor
 import ru.hse.cardefectscan.data.remote.LoggingInterceptor
 import ru.hse.cardefectscan.data.remote.TokenInterceptor
 import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.domain.usecase.AuthUseCase
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)

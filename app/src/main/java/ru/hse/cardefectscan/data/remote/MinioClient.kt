@@ -20,29 +20,29 @@ class MinioClient(
 ) {
     suspend fun putImage(imageUri: Uri, uploadLink: String) = withContext(Dispatchers.IO) {
         val contentResolver = context.contentResolver
-        val mediaType = contentResolver.getType(imageUri)?.toMediaTypeOrNull() ?: "application/octet-stream".toMediaTypeOrNull()
+        val mediaType = contentResolver.getType(imageUri)?.toMediaTypeOrNull()
+            ?: "application/octet-stream".toMediaTypeOrNull()
         Log.d("MinioClient", "Media type: $mediaType")
-        val inputStream = contentResolver.openInputStream(imageUri) ?: throw IOException("Failed to open InputStream")
-        inputStream.use {
-            val requestBody = object : RequestBody() {
-                override fun contentType(): MediaType? = mediaType
+        val inputStream = contentResolver.openInputStream(imageUri)
+            ?: throw IOException("Failed to open InputStream")
+        val requestBody = object : RequestBody() {
+            override fun contentType(): MediaType? = mediaType
 
-                override fun writeTo(sink: BufferedSink) {
-                    it.source().use { source ->
-                        sink.writeAll(source)
-                    }
+            override fun writeTo(sink: BufferedSink) {
+                inputStream.source().use { source ->
+                    sink.writeAll(source)
                 }
             }
-            val request = Request.Builder()
-                .url(uploadLink)
-                .put(requestBody)
-                .build()
-            runCatching {
-                client.newCall(request).execute()
-            }.onFailure { ex ->
-                Log.e("MinioClient", "An error occurred in put request: $ex")
-                throw ex
-            }
+        }
+        val request = Request.Builder()
+            .url(uploadLink)
+            .put(requestBody)
+            .build()
+        runCatching {
+            client.newCall(request).execute()
+        }.onFailure { ex ->
+            Log.e("MinioClient", "An error occurred in put request: $ex")
+            throw ex
         }
     }
 }
