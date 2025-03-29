@@ -16,8 +16,10 @@ dagger = "2.55"
 hiltNavigation = "1.2.0"
 kapt = "2.1.10"
 coil = "3.1.0"
+paging3 = "3.3.6"
 
 [libraries]
+paging3 = { group = "androidx.paging", name = "paging-compose", version.ref = "paging3" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
 dagger = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" }
