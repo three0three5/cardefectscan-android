@@ -17,6 +17,7 @@ import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.utils.SERVER_BASE_URL
 import ru.hse.generated.apis.AuthApi
 import ru.hse.generated.apis.ImagesApi
+import ru.hse.generated.apis.RequestsApi
 import java.io.File
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -108,6 +109,16 @@ class NetworkModule {
         baseUrl: String,
         @AuthenticatedOkHttpClient client: OkHttpClient,
     ): ImagesApi = ImagesApi(
+        basePath = baseUrl,
+        client = client,
+    )
+
+    @Provides
+    @Singleton
+    fun provideRequestsApi(
+        baseUrl: String,
+        @AuthenticatedOkHttpClient client: OkHttpClient,
+    ): RequestsApi = RequestsApi(
         basePath = baseUrl,
         client = client,
     )

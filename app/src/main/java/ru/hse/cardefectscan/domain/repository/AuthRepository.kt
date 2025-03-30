@@ -34,7 +34,10 @@ class AuthRepository(
         )
     }
 
-    override fun handleCookies(url: HttpUrl, cookies: List<Cookie>) {
+    override fun handleCookies(
+        url: HttpUrl,
+        cookies: List<Cookie>,
+    ) {
         Log.d("AuthRepository", "handle cookies")
         val cookie = cookies.filter {
             it.name == TOKEN_LABEL
