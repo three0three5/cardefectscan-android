@@ -50,8 +50,11 @@ class MainActivity : ComponentActivity() {
                         }
                         LoginScreen(navController)
                     }
-                    composable(REQUESTS_SCREEN) { RequestsScreen() }
-                    composable(RESULT_SCREEN) { ResultScreen() }
+                    composable(REQUESTS_SCREEN) { RequestsScreen(navController) }
+                    composable("$RESULT_SCREEN/{imageId}") { backStackEntry ->
+                        val imageId = backStackEntry.arguments?.getString("imageId")
+                        ResultScreen(imageId!!)
+                    }
                     composable(SETTINGS_SCREEN) { SettingsScreen(navController) }
                     composable(UPLOAD_SCREEN) { UploadScreen() }
                 }

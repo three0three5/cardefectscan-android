@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -40,7 +42,9 @@ import coil3.request.crossfade
 import ru.hse.cardefectscan.presentation.viewmodel.RequestsViewModel
 import ru.hse.cardefectscan.utils.DATE_FORMAT
 import ru.hse.cardefectscan.utils.LOAD_DATE
+import ru.hse.cardefectscan.utils.LOGIN_SCREEN
 import ru.hse.cardefectscan.utils.REQUEST_STATUS
+import ru.hse.cardefectscan.utils.RESULT_SCREEN
 import ru.hse.cardefectscan.utils.TRANSLATED_STATUS
 import ru.hse.cardefectscan.utils.UNKNOWN_STATUS
 import ru.hse.generated.models.ImageRequestElement
@@ -48,6 +52,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun RequestsScreen(
+    navController: NavController,
     vm: RequestsViewModel = hiltViewModel(),
 ) {
     val items = vm.handleResult(runCatching {
@@ -56,6 +61,7 @@ fun RequestsScreen(
     items?.let {
         Scaffold { innerPadding ->
             RequestElements(
+                navController = navController,
                 requests = items,
                 imageLoader = vm.imageLoader,
                 modifier = Modifier
@@ -69,6 +75,7 @@ fun RequestsScreen(
 
 @Composable
 fun RequestElements(
+    navController: NavController,
     requests: LazyPagingItems<ImageRequestElement>,
     modifier: Modifier = Modifier,
     imageLoader: ImageLoader,
@@ -103,6 +110,7 @@ fun RequestElements(
                 itemsIndexed(requests.itemSnapshotList) { _, item ->
                     item?.let {
                         RequestElement(
+                            navController = navController,
                             request = item,
                             imageLoader = imageLoader,
                         )
@@ -115,6 +123,7 @@ fun RequestElements(
 
 @Composable
 fun RequestElement(
+    navController: NavController,
     request: ImageRequestElement,
     imageLoader: ImageLoader,
 ) {
@@ -123,7 +132,9 @@ fun RequestElement(
     val status = TRANSLATED_STATUS[request.status] ?: UNKNOWN_STATUS.format(request.status)
 
     Button(
-        onClick = { /* TODO */ },
+        onClick = {
+            navController.navigate("$RESULT_SCREEN/${request.imageId}")
+        },
         modifier = Modifier
             .height(buttonHeight)
             .fillMaxWidth(0.9f),
@@ -192,5 +203,5 @@ fun ThumbnailImage(
 )
 @Composable
 fun RequestsScreenPreview() {
-    RequestsScreen()
+    RequestsScreen(rememberNavController())
 }
