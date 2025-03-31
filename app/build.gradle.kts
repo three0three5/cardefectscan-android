@@ -65,6 +65,8 @@ android {
 dependencies {
     implementation(libs.paging3)
     implementation(libs.coil)
+    implementation(libs.coil.okhttp)
+    implementation(libs.coil.cache.control)
     implementation(libs.hilt.navigation)
     implementation(libs.dagger)
     implementation(libs.hilt.android)

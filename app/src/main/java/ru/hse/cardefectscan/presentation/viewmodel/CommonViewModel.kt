@@ -30,6 +30,10 @@ abstract class CommonViewModel : ViewModel() {
         val result = runCatching {
             block.invoke()
         }
+        return handleResult(result)
+    }
+
+    fun <T> handleResult(result: Result<T>): T? {
         if (result.isFailure) {
             when (val throwable = result.exceptionOrNull()!!) {
                 is CommonException -> {

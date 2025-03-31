@@ -23,6 +23,6 @@ class RequestsModule {
     @Provides
     @Singleton
     fun provideRequestsUseCase(
-
-    ): RequestsUseCase = RequestsUseCase()
+        requestsPagingSource: RequestsPagingSource,
+    ): RequestsUseCase = RequestsUseCase(requestsPagingSource)
 }

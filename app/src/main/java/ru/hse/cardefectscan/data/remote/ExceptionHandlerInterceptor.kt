@@ -27,6 +27,7 @@ class ExceptionHandlerInterceptor : Interceptor {
     }
 
     private fun mapIoException(e: IOException): CommonException {
+        Log.e("ExceptionHandlerInterceptor", "error: ", e)
         var message = e.message
         if (message?.contains("Failed to connect") == true) {
             message = NETWORK_ISSUES
