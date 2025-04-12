@@ -434,11 +434,9 @@ components:
       type: object
       properties:
         result:
-          type: array
-          items:
-            type: integer
-            additionalProperties:
-              $ref: "#/components/schemas/ResultMetadata"
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ResultMetadata"
 
     ResultMetadata:
       type: object

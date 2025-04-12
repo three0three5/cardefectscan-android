@@ -1,9 +1,13 @@
 package ru.hse.cardefectscan.di
 
+import android.content.Context
+import coil3.ImageLoader
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import ru.hse.cardefectscan.domain.repository.RequestsPagingSource
 import ru.hse.cardefectscan.domain.usecase.RequestsUseCase
 import ru.hse.generated.apis.RequestsApi
@@ -24,5 +28,15 @@ class RequestsModule {
     @Singleton
     fun provideRequestsUseCase(
         requestsPagingSource: RequestsPagingSource,
-    ): RequestsUseCase = RequestsUseCase(requestsPagingSource)
+        requestsApi: RequestsApi,
+        @ApplicationContext context: Context,
+        imageLoader: ImageLoader,
+        @AuthenticatedOkHttpClient okHttpClient: OkHttpClient,
+    ): RequestsUseCase = RequestsUseCase(
+        pagingSource = requestsPagingSource,
+        requestsApi = requestsApi,
+        context = context,
+        imageLoader = imageLoader,
+        okHttpClient = okHttpClient,
+    )
 }
