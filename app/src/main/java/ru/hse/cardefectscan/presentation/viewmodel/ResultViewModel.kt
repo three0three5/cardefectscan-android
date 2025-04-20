@@ -24,4 +24,6 @@ class ResultViewModel @Inject constructor(
             isLoading = false
         }
     }
+
+    fun generateColor(label: Int) = requestsUseCase.generateColor(label)
 }

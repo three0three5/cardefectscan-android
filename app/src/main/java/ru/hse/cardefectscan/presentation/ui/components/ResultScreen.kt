@@ -1,22 +1,45 @@
 package ru.hse.cardefectscan.presentation.ui.components
 
-import android.graphics.Color
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.presentation.viewmodel.ResultViewModel
+import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
+import ru.hse.cardefectscan.utils.LABEL_TRANSCRIPTIONS
+import ru.hse.generated.models.ResultMetadata
+
+private const val IMAGE_HEIGHT_MAX = 800
 
 @Composable
 fun ResultScreen(
@@ -28,42 +51,148 @@ fun ResultScreen(
         vm.loadData(imageId)
     }
     Scaffold { innerPadding ->
-        Text(
-            imageId,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            style = MaterialTheme.typography.titleLarge
-        )
         if (vm.isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
         }
         vm.result?.let {
-            ProcessedResultComponent(it)
+            ProcessedResultComponent(
+                vm,
+                it,
+                padding = innerPadding,
+            )
         }
     }
     DisplayMessage(vm)
 }
 
 @Composable
-fun ProcessedResultComponent(result: ProcessedResult) {
-    val set: MutableSet<Int> = mutableSetOf()
-    val img = result.result ?: return
+fun ProcessedResultComponent(
+    vm: ResultViewModel,
+    result: ProcessedResult,
+    padding: PaddingValues,
+) {
+    val originalBitmap = result.original
+    val renderedBitmap = result.result?.first
+    val legendData = result.result?.second?.result
 
-    val bitmap = img.first.asAndroidBitmap()
-    Log.d("ResultScreen", "Metadata: ${img.second}")
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(padding)
+    ) {
+        Text(text = "Оригинальное изображение", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        OriginalImage(originalBitmap)
+        Spacer(modifier = Modifier.height(16.dp))
 
-    val width = bitmap.width
-    val height = bitmap.height
+        Text(text = "Результат сегментации", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        ResultImage(renderedBitmap)
+        Spacer(modifier = Modifier.height(16.dp))
 
-    for (y in 0 until height) {
-        for (x in 0 until width) {
-            val pixel = bitmap.getPixel(x, y)
-            val value = Color.red(pixel)
-            set.add(value)
-        }
+        Text(text = "Описание сегментов", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        Legend(legendData, vm)
     }
-    Log.d("ResultScreen", "Unique values: $set")
+}
+
+@Composable
+private fun Legend(
+    legendData: Map<String, ResultMetadata>?,
+    vm: ResultViewModel,
+) {
+    if (!legendData.isNullOrEmpty()) {
+        legendData.entries
+            .mapNotNull { entry ->
+                entry.key.toIntOrNull()?.let { key -> key to entry.value }
+            }
+            .filter { it.first != 0 }
+            .sortedBy { it.first }
+            .forEach { (label, metadata) ->
+                LegendRow(vm, label, metadata)
+            }
+    } else {
+        Text(
+            text = "Информация о сегментах отсутствует",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+private fun ResultImage(
+    renderedBitmap: Bitmap?,
+) {
+    if (renderedBitmap != null) {
+        Image(
+            bitmap = renderedBitmap.asImageBitmap(),
+            contentDescription = "Результат",
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = IMAGE_HEIGHT_MAX.dp)
+                .border(1.dp, Color.LightGray)
+        )
+    } else {
+        Text(
+            text = "Результат недоступен",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+private fun OriginalImage(
+    originalBitmap: Bitmap?,
+) {
+    if (originalBitmap != null) {
+        Image(
+            bitmap = originalBitmap.asImageBitmap(),
+            contentDescription = "Оригинал",
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = IMAGE_HEIGHT_MAX.dp)
+                .border(1.dp, Color.LightGray)
+        )
+    } else {
+        Text(
+            text = "Оригинальное изображение недоступно",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+private fun LegendRow(
+    vm: ResultViewModel,
+    label: Int,
+    metadata: ResultMetadata,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        val color = Color(vm.generateColor(label))
+        val damageLevel = DAMAGE_LEVEL_TRANSCRIPTIONS[metadata.damageLevel] ?: "Неопределенный тип повреждения: ${metadata.damageLevel}"
+        val segmentName = LABEL_TRANSCRIPTIONS[metadata.segmentName] ?: "Неизвестный сегмент: ${metadata.segmentName}"
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .background(color)
+                .border(1.dp, Color.Black)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "$damageLevel: $segmentName",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 @Preview(

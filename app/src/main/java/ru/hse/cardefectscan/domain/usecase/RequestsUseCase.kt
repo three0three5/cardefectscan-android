@@ -3,10 +3,8 @@ package ru.hse.cardefectscan.domain.usecase
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import coil3.BitmapImage
 import coil3.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -30,6 +28,7 @@ class RequestsUseCase(
     private val imageLoader: ImageLoader,
     private val okHttpClient: OkHttpClient,
     private val context: Context,
+    private val segmentationRenderer: SegmentationRenderer = SegmentationRenderer(),
     val pagingSource: RequestsPagingSource,
 ) {
 
@@ -38,6 +37,8 @@ class RequestsUseCase(
         .build()
 
     private val resultListAdapter = moshi.adapter(ResultList::class.java)
+
+    fun generateColor(label: Int) = segmentationRenderer.generateColor(label)
 
     suspend fun getOriginalAndRenderedDrawable(imageId: String) = coroutineScope {
         val info = detailedInfo(imageId)
@@ -49,7 +50,7 @@ class RequestsUseCase(
         val renderedJob = async {
             info.resultImageDownloadLink?.let { link ->
                 loadBitmapWithMetadata(link)?.let { (bitmap, metadataJson) ->
-                    Pair(bitmap.asImageBitmap(), parseMetadata(metadataJson))
+                    Pair(bitmap, parseMetadata(metadataJson))
                 }
             }
         }
@@ -60,9 +61,16 @@ class RequestsUseCase(
         Log.d("RequestsUseCase", "Original loaded: ${originalBitmap != null}")
         Log.d("RequestsUseCase", "Rendered loaded: ${rendered != null}")
 
+        val resultRendered = if (rendered != null && originalBitmap != null) {
+            Pair(segmentationRenderer.renderResult(
+                original = originalBitmap,
+                mask = rendered.first,
+            ), rendered.second)
+        } else null
+
         return@coroutineScope info.toResult(
-            original = originalBitmap?.asImageBitmap(),
-            result = rendered
+            original = originalBitmap,
+            result = resultRendered,
         )
     }
 
@@ -75,10 +83,16 @@ class RequestsUseCase(
             val result = imageLoader.execute(request)
             if (result is SuccessResult) {
                 val drawable = result.image
-                if (drawable is BitmapDrawable) {
+                if (drawable is BitmapImage) {
                     drawable.bitmap
-                } else null
-            } else null
+                } else {
+                    Log.d("RequestsUseCase", "Result with imageLink $imageLink is not a BitmapImage")
+                    null
+                }
+            } else {
+                Log.d("RequestsUseCase", "Result with imageLink $imageLink is not a SuccessResult")
+                null
+            }
         }
     }
 
@@ -121,13 +135,13 @@ data class ProcessedResult(
     val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime,
     val status: ImageRequestStatus,
-    val original: ImageBitmap? = null,
-    val result: Pair<ImageBitmap, ResultList>? = null
+    val original: Bitmap? = null,
+    val result: Pair<Bitmap, ResultList>? = null
 )
 
 fun ImageRequestDetailed.toResult(
-    original: ImageBitmap?,
-    result: Pair<ImageBitmap, ResultList>?,
+    original: Bitmap?,
+    result: Pair<Bitmap, ResultList>?,
 ): ProcessedResult = ProcessedResult(
     imageId = imageId,
     createdAt = createdAt,

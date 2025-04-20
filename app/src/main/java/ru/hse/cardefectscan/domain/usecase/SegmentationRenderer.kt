@@ -1,50 +1,66 @@
 package ru.hse.cardefectscan.domain.usecase
 
-import androidx.compose.ui.graphics.Color
-import coil3.Image
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.util.SparseArray
 
 class SegmentationRenderer {
-    val colorSet = listOf(
-        Color(0xFFFFFFFF),
-        Color(0xFF0059FF),
-        Color(0xFF26FF00),
-        Color(0xFFFFF200),
-        Color(0xFFFF8400),
-        Color(0xFF8000FF),
-        Color(0xFFFF0000),
-        Color(0xFF162E4E),
-        Color(0xFFB45A8B),
-        Color(0xFF0059FF),
-        Color(0xFF00A86B),
-        Color(0xFF8A2BE2),
-        Color(0xFFFF69B4),
-        Color(0xFF00FFFF),
-        Color(0xFF556B2F),
-        Color(0xFF4682B4),
-        Color(0xFFDC143C),
-        Color(0xFFD2691E),
-        Color(0xFFDAA520)
-    )
 
+    /**
+     * Рендерит результат сегментации: накладывает цветную маску на оригинал.
+     *
+     * @param original  исходное RGB-изображение
+     * @param mask      маска сегментации (где значение канала R = лейбл 0…255)
+     * @param alpha     прозрачность маски (0f — невидима, 1f — полностью непрозрачна)
+     * @return          новый Bitmap с наложенной маской
+     */
     fun renderResult(
-        original: Image,
-        mask: Image,
-        alpha: Double = 0.5,
-    ): Image {
+        original: Bitmap,
+        mask: Bitmap,
+        alpha: Float = 0.5f
+    ): Bitmap {
         val colorized = colorizeMask(mask)
-        val blended = alphaBlending(original, mask, alpha)
-        return blended
+        return alphaBlending(original, colorized, alpha)
     }
 
-    private fun colorizeMask(mask: Image): Image {
-        return mask
+    fun generateColor(label: Int): Int {
+        val hue = (label * 137) % 360
+        val hsv = floatArrayOf(hue.toFloat(), 0.75f, 0.90f)
+        return Color.HSVToColor(hsv)
+    }
+
+    private fun colorizeMask(mask: Bitmap): Bitmap {
+        val w = mask.width
+        val h = mask.height
+        val out = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+
+        val labelToColor = SparseArray<Int>()
+
+        for (y in 0 until h) {
+            for (x in 0 until w) {
+                val color = when (val label = Color.red(mask.getPixel(x, y))) {
+                    0 -> Color.TRANSPARENT
+                    else -> labelToColor[label] ?: generateColor(label).also { labelToColor.put(label, it) }
+                }
+                out.setPixel(x, y, color)
+            }
+        }
+        return out
     }
 
     private fun alphaBlending(
-        img: Image,
-        layer: Image,
-        alpha: Double = 0.5,
-    ): Image {
-        return img
+        original: Bitmap,
+        overlay: Bitmap,
+        alpha: Float,
+    ): Bitmap {
+        val result = original.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(result)
+        val paint = Paint().apply {
+            this.alpha = (alpha.coerceIn(0f, 1f) * 255).toInt()
+        }
+        canvas.drawBitmap(overlay, 0f, 0f, paint)
+        return result
     }
 }
