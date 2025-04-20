@@ -39,14 +39,12 @@ import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.LABEL_TRANSCRIPTIONS
 import ru.hse.generated.models.ResultMetadata
 
-private const val IMAGE_HEIGHT_MAX = 800
-
 @Composable
 fun ResultScreen(
     imageId: String,
     vm: ResultViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(Unit) {
+    LaunchedEffect(imageId) {
         Log.d("ResultScreen", "Loading data")
         vm.loadData(imageId)
     }
@@ -65,7 +63,6 @@ fun ResultScreen(
             )
         }
     }
-    DisplayMessage(vm)
 }
 
 @Composable
@@ -84,6 +81,7 @@ fun ProcessedResultComponent(
             .verticalScroll(rememberScrollState())
             .padding(padding)
     ) {
+        // todo добавить остальные поля
         Text(text = "Оригинальное изображение", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         OriginalImage(originalBitmap)
@@ -97,6 +95,9 @@ fun ProcessedResultComponent(
         Text(text = "Описание сегментов", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         Legend(legendData, vm)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        DisplayMessage(vm)
     }
 }
 
@@ -133,8 +134,7 @@ private fun ResultImage(
             bitmap = renderedBitmap.asImageBitmap(),
             contentDescription = "Результат",
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = IMAGE_HEIGHT_MAX.dp)
+                .fillMaxSize()
                 .border(1.dp, Color.LightGray)
         )
     } else {
@@ -155,8 +155,7 @@ private fun OriginalImage(
             bitmap = originalBitmap.asImageBitmap(),
             contentDescription = "Оригинал",
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = IMAGE_HEIGHT_MAX.dp)
+                .fillMaxSize()
                 .border(1.dp, Color.LightGray)
         )
     } else {

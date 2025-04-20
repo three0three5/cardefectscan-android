@@ -8,7 +8,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.domain.usecase.RequestsUseCase
+import ru.hse.generated.models.ImageRequestStatus
 import javax.inject.Inject
+
+private val FINAL_STATUSES = listOf(
+    ImageRequestStatus.DONE,
+    ImageRequestStatus.FAILED,
+)
 
 @HiltViewModel
 class ResultViewModel @Inject constructor(
@@ -20,7 +26,14 @@ class ResultViewModel @Inject constructor(
     fun loadData(imageId: String) {
         viewModelScope.launch {
             isLoading = true
-            result = requestsUseCase.getOriginalAndRenderedDrawable(imageId)
+            runCatchingWithHandling {
+                // проверить кэш по imageId
+
+                result = requestsUseCase.getOriginalAndRenderedDrawable(imageId)
+                if (result?.status in FINAL_STATUSES) {
+                    // кэшировать на диске
+                }
+            }
             isLoading = false
         }
     }
