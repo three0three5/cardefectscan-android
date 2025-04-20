@@ -179,8 +179,10 @@ private fun LegendRow(
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
         val color = Color(vm.generateColor(label))
-        val damageLevel = DAMAGE_LEVEL_TRANSCRIPTIONS[metadata.damageLevel] ?: "Неопределенный тип повреждения: ${metadata.damageLevel}"
-        val segmentName = LABEL_TRANSCRIPTIONS[metadata.segmentName] ?: "Неизвестный сегмент: ${metadata.segmentName}"
+        val damageLevel = DAMAGE_LEVEL_TRANSCRIPTIONS[metadata.damageLevel]
+            ?: "Неопределенный тип повреждения: ${metadata.damageLevel}"
+        val segmentName = LABEL_TRANSCRIPTIONS[metadata.segmentName]
+            ?: "Неизвестный сегмент: ${metadata.segmentName}"
         Box(
             modifier = Modifier
                 .size(16.dp)

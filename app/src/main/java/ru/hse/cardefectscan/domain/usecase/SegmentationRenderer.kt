@@ -42,7 +42,12 @@ class SegmentationRenderer {
             for (x in 0 until w) {
                 val color = when (val label = Color.red(mask.getPixel(x, y))) {
                     0 -> Color.TRANSPARENT
-                    else -> labelToColor[label] ?: generateColor(label).also { labelToColor.put(label, it) }
+                    else -> labelToColor[label] ?: generateColor(label).also {
+                        labelToColor.put(
+                            label,
+                            it
+                        )
+                    }
                 }
                 out.setPixel(x, y, color)
             }

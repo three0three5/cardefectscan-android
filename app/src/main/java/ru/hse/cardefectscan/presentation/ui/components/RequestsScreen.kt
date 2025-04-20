@@ -42,7 +42,6 @@ import coil3.request.crossfade
 import ru.hse.cardefectscan.presentation.viewmodel.RequestsViewModel
 import ru.hse.cardefectscan.utils.DATE_FORMAT
 import ru.hse.cardefectscan.utils.LOAD_DATE
-import ru.hse.cardefectscan.utils.LOGIN_SCREEN
 import ru.hse.cardefectscan.utils.REQUEST_STATUS
 import ru.hse.cardefectscan.utils.RESULT_SCREEN
 import ru.hse.cardefectscan.utils.TRANSLATED_STATUS

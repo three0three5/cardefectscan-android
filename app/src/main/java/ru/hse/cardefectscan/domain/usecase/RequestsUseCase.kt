@@ -62,10 +62,12 @@ class RequestsUseCase(
         Log.d("RequestsUseCase", "Rendered loaded: ${rendered != null}")
 
         val resultRendered = if (rendered != null && originalBitmap != null) {
-            Pair(segmentationRenderer.renderResult(
-                original = originalBitmap,
-                mask = rendered.first,
-            ), rendered.second)
+            Pair(
+                segmentationRenderer.renderResult(
+                    original = originalBitmap,
+                    mask = rendered.first,
+                ), rendered.second
+            )
         } else null
 
         return@coroutineScope info.toResult(
@@ -86,7 +88,10 @@ class RequestsUseCase(
                 if (drawable is BitmapImage) {
                     drawable.bitmap
                 } else {
-                    Log.d("RequestsUseCase", "Result with imageLink $imageLink is not a BitmapImage")
+                    Log.d(
+                        "RequestsUseCase",
+                        "Result with imageLink $imageLink is not a BitmapImage"
+                    )
                     null
                 }
             } else {
