@@ -110,7 +110,8 @@ data class ProcessedResult(
     val updatedAt: OffsetDateTime,
     val status: ImageRequestStatus,
     val original: Bitmap? = null,
-    val result: Pair<Bitmap, ResultList>? = null
+    val result: Pair<Bitmap, ResultList>? = null,
+    val description: String? = null,
 )
 
 fun ImageRequestDetailed.toResult(
@@ -123,4 +124,5 @@ fun ImageRequestDetailed.toResult(
     status = status,
     original = original,
     result = result,
+    description = description,
 )

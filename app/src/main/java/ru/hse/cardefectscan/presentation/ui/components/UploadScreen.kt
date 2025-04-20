@@ -146,7 +146,7 @@ fun UploadButtons(
     vm: UploadViewModel,
     modifier: Modifier,
     launcher: ManagedActivityResultLauncher<String, Uri?>,
-    scope: CoroutineScope = rememberCoroutineScope()
+    scope: CoroutineScope = rememberCoroutineScope(),
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(13.dp),

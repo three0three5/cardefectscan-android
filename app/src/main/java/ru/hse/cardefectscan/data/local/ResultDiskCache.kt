@@ -44,7 +44,8 @@ class ResultDiskCache(
                 updatedAt = OffsetDateTime.parse(cached.updatedAt),
                 status = cached.status,
                 original = originalBitmap,
-                result = resultPair
+                result = resultPair,
+                description = cached.description,
             )
         } catch (e: Exception) {
             Log.e("ResultDiskCache", "Error while loading result: ${e.message}")
@@ -77,7 +78,8 @@ class ResultDiskCache(
             updatedAt = now,
             status = result.status,
             hasOriginal = hasOrig,
-            resultMetadata = result.result?.second?.result
+            resultMetadata = result.result?.second?.result,
+            description = result.description,
         )
         File(baseDir, "${id}.meta.json").writeText(adapter.toJson(cached))
     }
@@ -90,5 +92,6 @@ data class CachedProcessedResult(
     val updatedAt: String,
     val status: ImageRequestStatus,
     val hasOriginal: Boolean = false,
-    val resultMetadata: Map<String, ResultMetadata>? = null
+    val resultMetadata: Map<String, ResultMetadata>? = null,
+    val description: String? = null,
 )

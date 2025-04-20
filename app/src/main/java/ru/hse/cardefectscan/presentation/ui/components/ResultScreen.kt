@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,12 +32,15 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.presentation.viewmodel.ResultViewModel
 import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.LABEL_TRANSCRIPTIONS
+import ru.hse.cardefectscan.utils.STATUS_TRANSCRIPTION
 import ru.hse.generated.models.ResultMetadata
 
 @Composable
@@ -44,12 +48,8 @@ fun ResultScreen(
     imageId: String,
     vm: ResultViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(imageId) {
-        Log.d("ResultScreen", "Loading data")
-        withContext(Dispatchers.Default) {
-            vm.loadData(imageId)
-        }
-    }
+    Log.d("ResultScreen", "Loading data")
+    vm.loadData(imageId)
     Scaffold { innerPadding ->
         if (vm.isLoading) {
             CircularProgressIndicator(
@@ -77,6 +77,7 @@ fun ProcessedResultComponent(
     val originalBitmap = result.original
     val renderedBitmap = result.result?.first
     val legendData = result.result?.second?.result
+    val status = STATUS_TRANSCRIPTION[result.status] ?: "Статус неизвестен: ${result.status.value}"
 
     Column(
         modifier = Modifier
@@ -84,10 +85,15 @@ fun ProcessedResultComponent(
             .verticalScroll(rememberScrollState())
             .padding(padding)
     ) {
-        // todo добавить остальные поля
+        Text(text = "Статус запроса: $status")
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(text = "Оригинальное изображение", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         OriginalImage(originalBitmap)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Загружено: ${result.createdAt}", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "Результат сегментации", style = MaterialTheme.typography.titleLarge)
@@ -95,10 +101,18 @@ fun ProcessedResultComponent(
         ResultImage(renderedBitmap)
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text(text = "Статус обновлен: ${result.updatedAt}", style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(text = "Описание сегментов", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         Legend(legendData, vm)
         Spacer(modifier = Modifier.height(16.dp))
+
+        result.description?.let {
+            Text(text = "Описание ошибки: $it", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         DisplayMessage(vm)
     }

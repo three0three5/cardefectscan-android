@@ -1,5 +1,6 @@
 package ru.hse.cardefectscan.utils
 
+import ru.hse.generated.models.ImageRequestStatus
 import ru.hse.generated.models.ResultMetadata.DamageLevel
 
 
@@ -32,4 +33,10 @@ val DAMAGE_LEVEL_TRANSCRIPTIONS = mapOf(
     DamageLevel.CRACK to "трещина",
     DamageLevel.BROKEN to "разбит",
     DamageLevel.TOTAL_LOSS to "не подлежит восстановлению"
+)
+
+val STATUS_TRANSCRIPTION = mapOf(
+    ImageRequestStatus.DONE to "Запрос успешно завершен",
+    ImageRequestStatus.IN_PROGRESS to "Запрос в процессе обработки",
+    ImageRequestStatus.FAILED to "Запрос завершен с ошибкой",
 )
