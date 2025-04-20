@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.presentation.viewmodel.ResultViewModel
 import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
@@ -46,7 +46,9 @@ fun ResultScreen(
 ) {
     LaunchedEffect(imageId) {
         Log.d("ResultScreen", "Loading data")
-        vm.loadData(imageId)
+        withContext(Dispatchers.Default) {
+            vm.loadData(imageId)
+        }
     }
     Scaffold { innerPadding ->
         if (vm.isLoading) {
@@ -54,13 +56,14 @@ fun ResultScreen(
                 modifier = Modifier
                     .padding(innerPadding)
             )
-        }
-        vm.result?.let {
-            ProcessedResultComponent(
-                vm,
-                it,
-                padding = innerPadding,
-            )
+        } else {
+            vm.result?.let {
+                ProcessedResultComponent(
+                    vm,
+                    it,
+                    padding = innerPadding,
+                )
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package ru.hse.cardefectscan.di
 
 import android.content.Context
+import coil3.ImageLoader
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -96,11 +97,15 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideMinioClient(
+        @AuthenticatedOkHttpClient authenticatedClient: OkHttpClient,
         @DefaultOkHttpClient client: OkHttpClient,
         @ApplicationContext context: Context,
+        imageLoader: ImageLoader,
     ): MinioClient = MinioClient(
-        client,
-        context,
+        defaultClient = client,
+        authenticatedClient = authenticatedClient,
+        context = context,
+        imageLoader = imageLoader,
     )
 
     @Provides

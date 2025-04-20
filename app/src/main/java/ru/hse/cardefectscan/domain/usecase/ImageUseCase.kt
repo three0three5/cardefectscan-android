@@ -16,6 +16,7 @@ class ImageUseCase(
             imagesApi.apiV1ImagesLoadGet()
         }.link
         Log.d("ImageUseCase", "received link $uploadLink")
-        minioClient.putImage(imageUri, uploadLink)
+        val response = minioClient.putImage(imageUri, uploadLink)
+        Log.d("ImageUseCase", "response: $response")
     }
 }
