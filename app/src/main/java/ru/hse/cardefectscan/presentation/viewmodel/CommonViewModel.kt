@@ -51,7 +51,11 @@ abstract class CommonViewModel : ViewModel() {
                     val responseBody = clientError?.body as? String
                     Log.d("CommonViewModel", "Response body from client error: $responseBody")
 
-                    exceptionMessage = extractDetails(responseBody)
+                    if (throwable.statusCode == 413) {
+                        exceptionMessage = "Файл слишком большой. Загрузите изображение до 25 мб"
+                    } else {
+                        exceptionMessage = extractDetails(responseBody)
+                    }
                 }
 
                 is ServerException -> {
