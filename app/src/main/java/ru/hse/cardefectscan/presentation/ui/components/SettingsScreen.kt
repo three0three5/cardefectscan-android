@@ -45,11 +45,8 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize(0.6f)
             ) {
-                LogoutButton(
-                    navController,
-                    vm,
-                    scope,
-                )
+                LogoutButton(navController, vm, scope)
+                CacheClearButton(vm)
                 if (vm.isLoading) {
                     CircularProgressIndicator()
                 }
@@ -60,6 +57,18 @@ fun SettingsScreen(
         }
     }
 }
+
+@Composable
+fun CacheClearButton(vm: SettingsViewModel) {
+    Button(
+        onClick = {
+            vm.clearCache()
+        }
+    ) {
+        Text("Очистить кэш (${vm.cacheSize})")
+    }
+}
+
 
 @Composable
 fun LogoutButton(
