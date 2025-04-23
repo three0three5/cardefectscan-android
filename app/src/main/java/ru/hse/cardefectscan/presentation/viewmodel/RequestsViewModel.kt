@@ -15,7 +15,10 @@ class RequestsViewModel @Inject constructor(
     private val requestsUseCase: RequestsUseCase,
     val imageLoader: ImageLoader,
 ) : CommonViewModel() {
-    val pagerFlow = Pager(PagingConfig(pageSize = PAGE_SIZE)) {
+    val pagerFlow = Pager(PagingConfig(
+        pageSize = PAGE_SIZE,
+        prefetchDistance = 5,
+    )) {
         requestsUseCase.pagingSource
     }.flow.cachedIn(viewModelScope)
 }

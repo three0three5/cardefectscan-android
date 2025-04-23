@@ -8,7 +8,6 @@ import dagger.multibindings.IntoSet
 import okhttp3.Interceptor
 import ru.hse.cardefectscan.data.remote.ExceptionHandlerInterceptor
 import ru.hse.cardefectscan.data.remote.LoggingInterceptor
-import ru.hse.cardefectscan.data.remote.RetryInterceptor
 import ru.hse.cardefectscan.data.remote.TokenInterceptor
 import ru.hse.cardefectscan.domain.repository.AuthRepository
 import ru.hse.cardefectscan.domain.usecase.AuthUseCase
@@ -27,11 +26,6 @@ class InterceptorModule {
     @IntoSet
     @Singleton
     fun provideExceptionHandlerInterceptor(): Interceptor = ExceptionHandlerInterceptor()
-
-    @Provides
-    @IntoSet
-    @Singleton
-    fun provideRetryInterceptor(): Interceptor = RetryInterceptor()
 
     @Provides
     @Singleton

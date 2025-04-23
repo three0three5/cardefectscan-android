@@ -10,13 +10,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import ru.hse.cardefectscan.presentation.exception.CommonException
 import ru.hse.cardefectscan.utils.UNKNOWN_EXCEPTION
 import ru.hse.cardefectscan.utils.UtilsExtensions.notBlank
 import ru.hse.generated.infrastructure.ClientError
 import ru.hse.generated.infrastructure.ClientException
 import ru.hse.generated.infrastructure.ServerError
 import ru.hse.generated.infrastructure.ServerException
+import java.io.IOException
 
 abstract class CommonViewModel : ViewModel() {
     private var messageJob: Job? = null
@@ -33,10 +33,10 @@ abstract class CommonViewModel : ViewModel() {
         return handleResult(result)
     }
 
-    fun <T> handleResult(result: Result<T>): T? {
+    private fun <T> handleResult(result: Result<T>): T? {
         if (result.isFailure) {
             when (val throwable = result.exceptionOrNull()!!) {
-                is CommonException -> {
+                is IOException -> {
                     Log.w(
                         "CommonViewModel",
                         "Handled exception: $throwable with cause ${throwable.cause}"
