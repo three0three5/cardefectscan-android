@@ -96,7 +96,7 @@ fun LoginModeButton(vm: LoginViewModel) {
         },
         modifier = Modifier
             .fillMaxHeight(0.18f)
-            .fillMaxWidth(0.6f),
+            .fillMaxWidth(0.8f),
     ) {
         Text(LOGIN_MODE_BUTTON)
     }
@@ -121,7 +121,7 @@ fun SignupButton(
         },
         modifier = Modifier
             .fillMaxHeight(0.18f)
-            .fillMaxWidth(0.45f),
+            .fillMaxWidth(0.8f),
     ) {
         Text(SIGNUP_BUTTON)
     }
@@ -152,7 +152,7 @@ fun SignupModeButton(vm: LoginViewModel) {
         },
         modifier = Modifier
             .fillMaxHeight(0.14f)
-            .fillMaxWidth(0.4f),
+            .fillMaxWidth(0.8f),
     ) {
         Text(SIGNUP_MODE_BUTTON)
     }
@@ -178,7 +178,7 @@ fun LoginButton(
         },
         modifier = Modifier
             .fillMaxHeight(0.1f)
-            .fillMaxWidth(0.4f),
+            .fillMaxWidth(0.8f),
     ) {
         Log.d("LoginScreen", "Entered login ${vm.login} and password ${vm.password}")
         Text(LOGIN_BUTTON)

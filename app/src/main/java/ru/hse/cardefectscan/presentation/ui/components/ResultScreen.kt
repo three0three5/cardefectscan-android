@@ -59,6 +59,14 @@ fun ResultScreen(
                 )
             }
         }
+        vm.exceptionMessage.takeUnless { it.isBlank() }?.let {
+            Text(
+                vm.exceptionMessage,
+                color = Color.Red,
+                modifier = Modifier
+                    .padding(innerPadding)
+            )
+        }
     }
 }
 
@@ -107,8 +115,6 @@ fun ProcessedResultComponent(
             Text(text = "Описание ошибки: $it", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
         }
-
-        DisplayMessage(vm)
     }
 }
 

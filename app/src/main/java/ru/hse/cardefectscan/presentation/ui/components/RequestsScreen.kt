@@ -87,6 +87,21 @@ fun RequestElements(
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
+            if (requests.itemCount == 0 &&
+                requests.loadState.refresh is LoadState.NotLoading &&
+                requests.loadState.append is LoadState.NotLoading
+            ) {
+                item {
+                    Text(
+                        text = "Пока не было выполнено ни одного запроса",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 32.dp)
+                    )
+                }
+            }
             items(
                 count = requests.itemCount,
                 key = requests.itemKey { it.imageId }

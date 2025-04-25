@@ -49,13 +49,10 @@ fun HomeScaffold(
     navController: NavController
 ) {
     Scaffold { innerPadding ->
-        val topPadding = LocalConfiguration.current.screenHeightDp.dp * 0.1f
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(top = topPadding)
-                .fillMaxWidth()
-                .fillMaxHeight(0.8f),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             HomeButtonSet(navController)
@@ -65,12 +62,10 @@ fun HomeScaffold(
 
 @Composable
 fun HomeButtonSet(navController: NavController) {
-    val startPadding = LocalConfiguration.current.screenWidthDp.dp * 0.1f
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = startPadding),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         ToRequestsButton(navController)
         ToUploadButton(navController)
@@ -82,7 +77,7 @@ fun HomeButtonSet(navController: NavController) {
 fun ToRequestsButton(navController: NavController) {
     Button(
         modifier = Modifier
-            .fillMaxHeight(0.25f)
+            .fillMaxHeight(0.15f)
             .fillMaxWidth(0.8f),
         onClick = { navController.navigate(REQUESTS_SCREEN) }
     ) {
@@ -97,7 +92,7 @@ fun ToRequestsButton(navController: NavController) {
 fun ToUploadButton(navController: NavController) {
     Button(
         modifier = Modifier
-            .fillMaxHeight(0.25f)
+            .fillMaxHeight(0.18f)
             .fillMaxWidth(0.8f),
         onClick = { navController.navigate(UPLOAD_SCREEN) }
     ) {
@@ -112,7 +107,7 @@ fun ToUploadButton(navController: NavController) {
 fun ToSettingsButton(navController: NavController) {
     Button(
         modifier = Modifier
-            .fillMaxHeight(0.35f)
+            .fillMaxHeight(0.2f)
             .fillMaxWidth(0.8f),
         onClick = { navController.navigate(SETTINGS_SCREEN) }
     ) {
