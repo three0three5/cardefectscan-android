@@ -14,12 +14,12 @@ import java.io.File
 import java.time.OffsetDateTime
 
 class ResultDiskCache(
-    context: Context,
+    val context: Context,
 ) {
-    private val baseDir = File(context.cacheDir, "results").apply { mkdirs() }
     private val adapter = Serializer.moshi.adapter(CachedProcessedResult::class.java)
 
     fun get(imageId: String): ProcessedResult? {
+        val baseDir = File(context.cacheDir, "results").apply { mkdirs() }
         val metaFile = File(baseDir, "${imageId}.meta.json")
         if (!metaFile.exists()) return null
 
@@ -56,7 +56,7 @@ class ResultDiskCache(
 
     fun put(result: ProcessedResult) {
         val id = result.imageId
-        val now = OffsetDateTime.now().toString()
+        val baseDir = File(context.cacheDir, "results").apply { mkdirs() }
 
         val hasOrig = result.original != null
         if (hasOrig) {
@@ -75,7 +75,7 @@ class ResultDiskCache(
         val cached = CachedProcessedResult(
             imageId = id,
             createdAt = result.createdAt.toString(),
-            updatedAt = now,
+            updatedAt = result.updatedAt.toString(),
             status = result.status,
             hasOriginal = hasOrig,
             resultMetadata = result.result?.second?.result,
