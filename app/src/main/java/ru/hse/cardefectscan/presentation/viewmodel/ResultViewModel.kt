@@ -62,7 +62,6 @@ class ResultViewModel @Inject constructor(
         }
 
     fun saveBitmapToGallery(context: Context) {
-        val resultPair = result?.result ?: return
         val date = result?.createdAt?.formatDate() ?: return
 
         val filename = "segmentation_result_${date}.png"
