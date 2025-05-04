@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -119,7 +121,7 @@ fun ProcessedResultComponent(
         Legend(legendData, vm)
         Spacer(modifier = Modifier.height(16.dp))
 
-        vm.result?.result?.let {
+        vm.renderedBitmap?.let {
             DownloadResultButton(vm)
         }
 
@@ -134,7 +136,12 @@ fun ProcessedResultComponent(
 private fun DownloadResultButton(
     vm: ResultViewModel,
 ) {
-    // todo
+    val context = LocalContext.current
+    Button(onClick = {
+        vm.saveBitmapToGallery(context)
+    }) {
+        Text("Скачать результат")
+    }
 }
 
 @Composable

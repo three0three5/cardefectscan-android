@@ -1,6 +1,11 @@
 package ru.hse.cardefectscan.presentation.viewmodel
 
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
+import android.provider.MediaStore
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +18,8 @@ import kotlinx.coroutines.withContext
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.domain.usecase.RequestsUseCase
 import ru.hse.cardefectscan.domain.usecase.ResultUseCase
+import ru.hse.cardefectscan.utils.UtilsExtensions.formatDate
+import java.io.OutputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,6 +61,38 @@ class ResultViewModel @Inject constructor(
             }
         }
 
+    fun saveBitmapToGallery(context: Context) {
+        val resultPair = result?.result ?: return
+        val date = result?.createdAt?.formatDate() ?: return
+
+        val filename = "segmentation_result_${date}.png"
+        val resolver = context.contentResolver
+        val imageCollection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/CarDefectScan")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+
+        val bitmap = renderedBitmap ?: return
+        val imageUri = resolver.insert(imageCollection, contentValues)
+        imageUri?.let { uri ->
+            resolver.openOutputStream(uri)?.use { stream: OutputStream ->
+                if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) {
+                    contentValues.clear()
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+                    resolver.update(uri, contentValues, null, null)
+                    Toast.makeText(context, "Изображение сохранено", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Не удалось сохранить изображение", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } ?: run {
+            Toast.makeText(context, "Ошибка доступа к хранилищу", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     fun generateColor(label: Int) = resultUseCase.generateColor(label)
 }
