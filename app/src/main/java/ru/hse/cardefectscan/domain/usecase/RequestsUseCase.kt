@@ -28,7 +28,6 @@ class RequestsUseCase(
     private val resultDiskCache: ResultDiskCache,
     private val requestsApi: RequestsApi,
     private val minioClient: MinioClient,
-    private val segmentationRenderer: SegmentationRenderer = SegmentationRenderer(),
     val pagingSource: RequestsPagingSource,
 ) {
 
@@ -37,8 +36,6 @@ class RequestsUseCase(
         .build()
 
     private val resultListAdapter = moshi.adapter(ResultList::class.java)
-
-    fun generateColor(label: Int) = segmentationRenderer.generateColor(label)
 
     suspend fun getOriginalAndRenderedDrawable(imageId: String) = coroutineScope {
         val cached = resultDiskCache.get(imageId)
@@ -57,7 +54,7 @@ class RequestsUseCase(
             minioClient.loadBitmap(imageLink = info.originalImageDownloadLink)
         }
 
-        val renderedJob = coroutineScope.async {
+        val resultJob = coroutineScope.async {
             info.resultImageDownloadLink?.let { link ->
                 minioClient.loadBitmapWithMetadata(link)?.let { (bitmap, metadataJson) ->
                     Pair(bitmap, parseMetadata(metadataJson))
@@ -66,31 +63,22 @@ class RequestsUseCase(
         }
 
         val originalBitmap = originalJob.await()
-        val rendered = renderedJob.await()
+        val result = resultJob.await()
 
         Log.d("RequestsUseCase", "Original loaded: ${originalBitmap != null}")
-        Log.d("RequestsUseCase", "Rendered loaded: ${rendered != null}")
+        Log.d("RequestsUseCase", "Result mask and legend loaded: ${result != null}")
 
-        val resultRendered = if (rendered != null && originalBitmap != null) {
-            Pair(
-                segmentationRenderer.renderResult(
-                    original = originalBitmap,
-                    mask = rendered.first,
-                ), rendered.second
-            )
-        } else null
-
-        val result = info.toResult(
+        val finalResult = info.toResult(
             original = originalBitmap,
-            result = resultRendered,
+            result = result,
         )
 
         if (info.status in FINAL_STATUSES) coroutineScope.launch{
             Log.d("RequestsUseCase", "Saving result to disk cache")
-            resultDiskCache.put(result)
+            resultDiskCache.put(finalResult)
         }
 
-        return result
+        return finalResult
     }
 
     private suspend fun detailedInfo(imageId: String): ImageRequestDetailed {

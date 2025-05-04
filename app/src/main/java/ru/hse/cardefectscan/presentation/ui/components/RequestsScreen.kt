@@ -44,14 +44,13 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import ru.hse.cardefectscan.presentation.viewmodel.RequestsViewModel
-import ru.hse.cardefectscan.utils.DATE_FORMAT
 import ru.hse.cardefectscan.utils.LOAD_DATE
 import ru.hse.cardefectscan.utils.REQUEST_STATUS
 import ru.hse.cardefectscan.utils.RESULT_SCREEN
 import ru.hse.cardefectscan.utils.TRANSLATED_STATUS
 import ru.hse.cardefectscan.utils.UNKNOWN_STATUS
+import ru.hse.cardefectscan.utils.UtilsExtensions.formatDate
 import ru.hse.generated.models.ImageRequestElement
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun RequestsScreen(
@@ -205,11 +204,7 @@ fun RequestElement(
                 )
                 Text(
                     text = LOAD_DATE.format(
-                        request.createdAt.format(
-                            DateTimeFormatter.ofPattern(
-                                DATE_FORMAT
-                            )
-                        )
+                        request.createdAt.formatDate()
                     ),
                     style = MaterialTheme.typography.bodySmall
                 )

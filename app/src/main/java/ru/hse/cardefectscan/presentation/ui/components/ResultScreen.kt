@@ -20,8 +20,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +37,7 @@ import ru.hse.cardefectscan.presentation.viewmodel.ResultViewModel
 import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.LABEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.STATUS_TRANSCRIPTION
+import ru.hse.cardefectscan.utils.UtilsExtensions.formatDate
 import ru.hse.generated.models.ResultMetadata
 
 @Composable
@@ -77,7 +80,6 @@ fun ProcessedResultComponent(
     padding: PaddingValues,
 ) {
     val originalBitmap = result.original
-    val renderedBitmap = result.result?.first
     val legendData = result.result?.second?.result
     val status = STATUS_TRANSCRIPTION[result.status] ?: "Статус неизвестен: ${result.status.value}"
 
@@ -95,15 +97,21 @@ fun ProcessedResultComponent(
         OriginalImage(originalBitmap)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Загружено: ${result.createdAt}", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "Загружено: ${result.createdAt.formatDate()}", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "Результат сегментации", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        ResultImage(renderedBitmap)
+        ResultImage(vm)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Статус обновлен: ${result.updatedAt}", style = MaterialTheme.typography.bodyMedium)
+        vm.result?.result?.let {
+            Text(text = "Выбрать уровень прозрачности маски сегментации", style = MaterialTheme.typography.bodyMedium)
+            TransparencySlider(vm)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Text(text = "Статус обновлен: ${result.updatedAt.formatDate()}", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "Описание сегментов", style = MaterialTheme.typography.titleLarge)
@@ -111,10 +119,40 @@ fun ProcessedResultComponent(
         Legend(legendData, vm)
         Spacer(modifier = Modifier.height(16.dp))
 
+        vm.result?.result?.let {
+            DownloadResultButton(vm)
+        }
+
         result.description?.let {
             Text(text = "Описание ошибки: $it", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+@Composable
+private fun DownloadResultButton(
+    vm: ResultViewModel,
+) {
+    // todo
+}
+
+@Composable
+private fun TransparencySlider(
+    vm: ResultViewModel,
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Slider(
+            value = vm.transparencyCoefficient,
+            onValueChange = { vm.transparencyCoefficient = it },
+            valueRange = 0f..1f,
+            steps = 20,
+        )
+        Text(
+            text = "Текущая прозрачность: ${(vm.transparencyCoefficient * 100).toInt()}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
     }
 }
 
@@ -144,22 +182,33 @@ private fun Legend(
 
 @Composable
 private fun ResultImage(
-    renderedBitmap: Bitmap?,
+    vm: ResultViewModel,
 ) {
-    if (renderedBitmap != null) {
+    val resultBitmap = vm.result?.result?.first
+    val originalBitmap = vm.result?.original
+    LaunchedEffect(resultBitmap, originalBitmap, vm.transparencyCoefficient) {
+        if (resultBitmap != null && originalBitmap != null) {
+            vm.renderImage(resultBitmap, originalBitmap)
+        }
+    }
+    vm.renderedBitmap?.let { bmp ->
         Image(
-            bitmap = renderedBitmap.asImageBitmap(),
+            bitmap = bmp.asImageBitmap(),
             contentDescription = "Результат",
             modifier = Modifier
                 .fillMaxSize()
                 .border(1.dp, Color.LightGray)
         )
-    } else {
-        Text(
-            text = "Результат недоступен",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
-        )
+    } ?: run {
+        if (vm.isRendering) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = "Результат недоступен",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
     }
 }
 

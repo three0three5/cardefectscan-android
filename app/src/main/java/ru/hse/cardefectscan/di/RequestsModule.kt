@@ -10,6 +10,7 @@ import ru.hse.cardefectscan.data.local.ResultDiskCache
 import ru.hse.cardefectscan.data.remote.MinioClient
 import ru.hse.cardefectscan.domain.repository.RequestsPagingSource
 import ru.hse.cardefectscan.domain.usecase.RequestsUseCase
+import ru.hse.cardefectscan.domain.usecase.ResultUseCase
 import ru.hse.generated.apis.RequestsApi
 import javax.inject.Singleton
 
@@ -45,5 +46,11 @@ class RequestsModule {
         requestsApi = requestsApi,
         resultDiskCache = resultDiskCache,
         minioClient = minioClient,
+    )
+
+    @Provides
+    @Singleton
+    fun provideResultUseCase(
+    ) = ResultUseCase(
     )
 }

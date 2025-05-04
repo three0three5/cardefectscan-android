@@ -7,15 +7,6 @@ import android.graphics.Paint
 import android.util.SparseArray
 
 class SegmentationRenderer {
-
-    /**
-     * Рендерит результат сегментации: накладывает цветную маску на оригинал.
-     *
-     * @param original  исходное RGB-изображение
-     * @param mask      маска сегментации (где значение канала R = лейбл 0…255)
-     * @param alpha     прозрачность маски (0f — невидима, 1f — полностью непрозрачна)
-     * @return          новый Bitmap с наложенной маской
-     */
     fun renderResult(
         original: Bitmap,
         mask: Bitmap,
