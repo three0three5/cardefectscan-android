@@ -16,6 +16,7 @@ class UploadViewModel @Inject constructor(
     var imageUri by mutableStateOf<Uri?>(null)
     var isLoading by mutableStateOf(false)
     var loaded by mutableStateOf(false)
+    val photoUri = mutableStateOf<Uri?>(null)
 
     suspend fun upload() {
         isLoading = true
