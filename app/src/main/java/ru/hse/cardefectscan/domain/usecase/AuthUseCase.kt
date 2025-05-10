@@ -4,6 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.hse.cardefectscan.domain.repository.AuthRepository
+import ru.hse.cardefectscan.presentation.exception.LoginTooShortException
+import ru.hse.cardefectscan.presentation.exception.PasswordTooShortException
 import ru.hse.cardefectscan.presentation.exception.PasswordsNotMatchException
 import ru.hse.generated.apis.AuthApi
 import ru.hse.generated.models.LoginRequest
@@ -33,6 +35,7 @@ class AuthUseCase(
     }
 
     suspend fun login(login: String, password: String) {
+        validate(login, password)
         val tokenResponse = withContext(Dispatchers.IO) {
             Log.d("AuthUseCase", "Entered IO context")
             authApi.apiV1AuthLoginPost(
@@ -55,7 +58,7 @@ class AuthUseCase(
     }
 
     suspend fun signup(login: String, password: String, additionalPassword: String) {
-        if (password != additionalPassword) throw PasswordsNotMatchException()
+        validate(login, password, additionalPassword)
         val tokenResponse = withContext(Dispatchers.IO) {
             authApi.apiV1AuthSignupPost(
                 SignupRequest(
@@ -67,5 +70,15 @@ class AuthUseCase(
         Log.d("AuthUseCase", "received response $tokenResponse")
         authRepository.jwtToken = tokenResponse.accessToken
         Log.d("AuthUseCase", "Now authRepository.jwtToken value is ${authRepository.jwtToken}")
+    }
+
+    private fun validate(
+        login: String,
+        password: String,
+        additionalPassword: String? = null,
+    ) {
+        if (login.length < 6) throw LoginTooShortException()
+        if (password.length < 6) throw PasswordTooShortException()
+        if (additionalPassword != null && password != additionalPassword) throw PasswordsNotMatchException()
     }
 }
