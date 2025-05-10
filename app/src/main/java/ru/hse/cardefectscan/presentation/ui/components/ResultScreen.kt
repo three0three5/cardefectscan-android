@@ -25,6 +25,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.cardefectscan.presentation.viewmodel.ResultViewModel
 import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
@@ -108,9 +112,13 @@ fun ProcessedResultComponent(
         Spacer(modifier = Modifier.height(16.dp))
 
         vm.result?.result?.let {
-            Text(text = "Выбрать уровень прозрачности маски сегментации", style = MaterialTheme.typography.bodyMedium)
-            TransparencySlider(vm)
-            Spacer(modifier = Modifier.height(16.dp))
+            if (vm.isRendering) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = "Выбрать уровень прозрачности маски сегментации", style = MaterialTheme.typography.bodyMedium)
+                TransparencySlider(vm)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
         Text(text = "Статус обновлен: ${result.updatedAt.formatDate()}", style = MaterialTheme.typography.bodyMedium)
@@ -187,16 +195,17 @@ private fun Legend(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun ResultImage(
     vm: ResultViewModel,
 ) {
-    val resultBitmap = vm.result?.result?.first
-    val originalBitmap = vm.result?.original
-    LaunchedEffect(resultBitmap, originalBitmap, vm.transparencyCoefficient) {
-        if (resultBitmap != null && originalBitmap != null) {
-            vm.renderImage(resultBitmap, originalBitmap)
-        }
+    LaunchedEffect(vm.transparencyCoefficient) {
+        snapshotFlow { vm.transparencyCoefficient }
+            .debounce(500)
+            .collectLatest {
+                vm.renderImage()
+            }
     }
     vm.renderedBitmap?.let { bmp ->
         Image(

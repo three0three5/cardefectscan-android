@@ -46,8 +46,11 @@ class ResultViewModel @Inject constructor(
             }
         }
 
-    fun renderImage(resultBitmap: Bitmap, originalBitmap: Bitmap) =
+    fun renderImage() =
         viewModelScope.launch {
+            val resultBitmap = result?.result?.first
+            val originalBitmap = result?.original
+            if (resultBitmap == null || originalBitmap == null) return@launch
             renderedBitmap = withContext(Dispatchers.Default) {
                 if (isRendering) return@withContext null
                 isRendering = true
