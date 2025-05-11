@@ -44,7 +44,6 @@ import ru.hse.cardefectscan.utils.DAMAGE_LEVEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.LABEL_TRANSCRIPTIONS
 import ru.hse.cardefectscan.utils.STATUS_TRANSCRIPTION
 import ru.hse.cardefectscan.utils.UtilsExtensions.formatDate
-import ru.hse.generated.models.ResultMetadata
 
 @Composable
 fun ResultScreen(
@@ -86,7 +85,6 @@ fun ProcessedResultComponent(
     padding: PaddingValues,
 ) {
     val originalBitmap = result.original
-    val legendData = result.result?.second?.result
     val status = STATUS_TRANSCRIPTION[result.status] ?: "Статус неизвестен: ${result.status.value}"
 
     Column(
@@ -126,7 +124,7 @@ fun ProcessedResultComponent(
 
         Text(text = "Описание сегментов", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        Legend(legendData, vm)
+        Legend(vm)
         Spacer(modifier = Modifier.height(16.dp))
 
         vm.renderedBitmap?.let {
@@ -173,20 +171,16 @@ private fun TransparencySlider(
 
 @Composable
 private fun Legend(
-    legendData: Map<String, ResultMetadata>?,
     vm: ResultViewModel,
 ) {
-    if (!legendData.isNullOrEmpty()) {
-        legendData.entries
-            .mapNotNull { entry ->
-                entry.key.toIntOrNull()?.let { key -> key to entry.value }
+    vm.labelSet?.let {
+            it.filter { p ->
+                p.first != 0
             }
-            .filter { it.first != 0 }
-            .sortedBy { it.first }
-            .forEach { (label, metadata) ->
-                LegendRow(vm, label, metadata)
+            .forEach { (segment, damage) ->
+                LegendRow(vm, segment, damage)
             }
-    } else {
+    } ?: run {
         Text(
             text = "Информация о сегментах отсутствует",
             style = MaterialTheme.typography.bodyMedium,
@@ -252,18 +246,24 @@ private fun OriginalImage(
 @Composable
 private fun LegendRow(
     vm: ResultViewModel,
-    label: Int,
-    metadata: ResultMetadata,
+    segment: Int,
+    damage: Int,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
-        val color = Color(vm.generateColor(label))
-        val damageLevel = DAMAGE_LEVEL_TRANSCRIPTIONS[metadata.damageLevel]
-            ?: "Неопределенный тип повреждения: ${metadata.damageLevel}"
-        val segmentName = LABEL_TRANSCRIPTIONS[metadata.segmentName]
-            ?: "Неизвестный сегмент: ${metadata.segmentName}"
+        val color = Color(vm.generateColor(segment, damage))
+        val damageLevel = DAMAGE_LEVEL_TRANSCRIPTIONS.getOrNull(damage)
+            ?: run {
+                Log.e("ResultScreen", "damage label invalid $damage")
+                "Неизвестный тип повреждения"
+            }
+        val segmentName = LABEL_TRANSCRIPTIONS.getOrNull(segment)
+            ?: run {
+                Log.e("ResultScreen", "segment label invalid $segment")
+                "Неизвестный тип сегмента"
+            }
         Box(
             modifier = Modifier
                 .size(16.dp)

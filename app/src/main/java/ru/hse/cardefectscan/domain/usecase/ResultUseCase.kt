@@ -5,13 +5,13 @@ import android.graphics.Bitmap
 class ResultUseCase(
     private val segmentationRenderer: SegmentationRenderer = SegmentationRenderer(),
 ) {
-    fun generateColor(label: Int) = segmentationRenderer.generateColor(label)
+    fun generateColor(segment: Int, damage: Int) = segmentationRenderer.generateColor(segment, damage)
 
-    fun getRenderedImage(
+    fun getRenderedImageWithLabels(
         original: Bitmap,
         result: Bitmap,
         alpha: Float,
-    ): Bitmap = segmentationRenderer.renderResult(
+    ): Pair<Bitmap, Set<Pair<Int, Int>>> = segmentationRenderer.renderResult(
         original,
         result,
         alpha,

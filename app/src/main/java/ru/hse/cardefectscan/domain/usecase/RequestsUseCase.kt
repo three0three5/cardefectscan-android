@@ -2,8 +2,6 @@ package ru.hse.cardefectscan.domain.usecase
 
 import android.graphics.Bitmap
 import android.util.Log
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -16,7 +14,6 @@ import ru.hse.cardefectscan.domain.repository.RequestsPagingSource
 import ru.hse.generated.apis.RequestsApi
 import ru.hse.generated.models.ImageRequestDetailed
 import ru.hse.generated.models.ImageRequestStatus
-import ru.hse.generated.models.ResultList
 import java.time.OffsetDateTime
 
 private val FINAL_STATUSES = listOf(
@@ -30,13 +27,6 @@ class RequestsUseCase(
     private val minioClient: MinioClient,
     val pagingSource: RequestsPagingSource,
 ) {
-
-    private val moshi: Moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    private val resultListAdapter = moshi.adapter(ResultList::class.java)
-
     suspend fun getOriginalAndRenderedDrawable(imageId: String) = coroutineScope {
         val cached = resultDiskCache.get(imageId)
         if (cached != null) return@coroutineScope cached
@@ -56,9 +46,7 @@ class RequestsUseCase(
 
         val resultJob = coroutineScope.async {
             info.resultImageDownloadLink?.let { link ->
-                minioClient.loadBitmapWithMetadata(link)?.let { (bitmap, metadataJson) ->
-                    Pair(bitmap, parseMetadata(metadataJson))
-                }
+                minioClient.loadBitmap(link)
             }
         }
 
@@ -86,10 +74,6 @@ class RequestsUseCase(
             requestsApi.apiV1RequestsImageIdGet(imageId)
         }
     }
-
-    private fun parseMetadata(json: String): ResultList =
-        resultListAdapter.fromJson(json)
-            ?: throw IllegalArgumentException("Невозможно получить данные сегментации из json: $json")
 }
 
 data class ProcessedResult(
@@ -98,13 +82,13 @@ data class ProcessedResult(
     val updatedAt: OffsetDateTime,
     val status: ImageRequestStatus,
     val original: Bitmap? = null,
-    val result: Pair<Bitmap, ResultList>? = null,
+    val result: Bitmap? = null,
     val description: String? = null,
 )
 
 fun ImageRequestDetailed.toResult(
     original: Bitmap?,
-    result: Pair<Bitmap, ResultList>?,
+    result: Bitmap?,
 ): ProcessedResult = ProcessedResult(
     imageId = imageId,
     createdAt = createdAt,

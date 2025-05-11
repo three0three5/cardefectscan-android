@@ -33,6 +33,8 @@ class ResultViewModel @Inject constructor(
     var renderedBitmap by mutableStateOf<Bitmap?>(null)
         private set
     var transparencyCoefficient: Float by mutableFloatStateOf(0.5f)
+    var labelSet by mutableStateOf<Set<Pair<Int, Int>>?>(null)
+        private set
 
     fun loadData(imageId: String) =
         viewModelScope.launch {
@@ -48,19 +50,20 @@ class ResultViewModel @Inject constructor(
 
     fun renderImage() =
         viewModelScope.launch {
-            val resultBitmap = result?.result?.first
+            val resultBitmap = result?.result
             val originalBitmap = result?.original
             if (resultBitmap == null || originalBitmap == null) return@launch
             renderedBitmap = withContext(Dispatchers.Default) {
                 if (isRendering) return@withContext null
                 isRendering = true
-                val res = resultUseCase.getRenderedImage(
+                val res = resultUseCase.getRenderedImageWithLabels(
                     originalBitmap,
                     resultBitmap,
                     1 - transparencyCoefficient,
                 )
                 isRendering = false
-                res
+                labelSet = res.second
+                res.first
             }
         }
 
@@ -96,5 +99,5 @@ class ResultViewModel @Inject constructor(
         }
     }
 
-    fun generateColor(label: Int) = resultUseCase.generateColor(label)
+    fun generateColor(segment: Int, damage: Int) = resultUseCase.generateColor(segment, damage)
 }

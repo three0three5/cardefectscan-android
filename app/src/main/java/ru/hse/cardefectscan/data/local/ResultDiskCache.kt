@@ -8,8 +8,6 @@ import com.squareup.moshi.JsonClass
 import ru.hse.cardefectscan.domain.usecase.ProcessedResult
 import ru.hse.generated.infrastructure.Serializer
 import ru.hse.generated.models.ImageRequestStatus
-import ru.hse.generated.models.ResultList
-import ru.hse.generated.models.ResultMetadata
 import java.io.File
 import java.time.OffsetDateTime
 
@@ -26,17 +24,11 @@ class ResultDiskCache(
         return try {
             val cached = adapter.fromJson(metaFile.readText()) ?: return null
 
-            val originalBitmap = if (cached.hasOriginal) {
-                File(baseDir, "${imageId}.orig.png").takeIf { it.exists() }
+            val originalBitmap = File(baseDir, "${imageId}.orig.png").takeIf { it.exists() }
                     ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-            } else null
 
             val resultBitmap = File(baseDir, "${imageId}.res.png").takeIf { it.exists() }
                 ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-
-            val resultPair = if (cached.resultMetadata != null && resultBitmap != null) {
-                Pair(resultBitmap, ResultList(cached.resultMetadata))
-            } else null
 
             ProcessedResult(
                 imageId = cached.imageId,
@@ -44,7 +36,7 @@ class ResultDiskCache(
                 updatedAt = OffsetDateTime.parse(cached.updatedAt),
                 status = cached.status,
                 original = originalBitmap,
-                result = resultPair,
+                result = resultBitmap,
                 description = cached.description,
             )
         } catch (e: Exception) {
@@ -58,17 +50,15 @@ class ResultDiskCache(
         val id = result.imageId
         val baseDir = File(context.cacheDir, "results").apply { mkdirs() }
 
-        val hasOrig = result.original != null
-        if (hasOrig) {
+        result.original?.let {
             File(baseDir, "${id}.orig.png").outputStream().use { out ->
-                result.original!!.compress(Bitmap.CompressFormat.PNG, 100, out)
+                it.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
         }
 
-        val hasRes = result.result?.first != null
-        if (hasRes) {
+        result.result?.let {
             File(baseDir, "${id}.res.png").outputStream().use { out ->
-                result.result!!.first.compress(Bitmap.CompressFormat.PNG, 100, out)
+                it.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
         }
 
@@ -77,8 +67,6 @@ class ResultDiskCache(
             createdAt = result.createdAt.toString(),
             updatedAt = result.updatedAt.toString(),
             status = result.status,
-            hasOriginal = hasOrig,
-            resultMetadata = result.result?.second?.result,
             description = result.description,
         )
         File(baseDir, "${id}.meta.json").writeText(adapter.toJson(cached))
@@ -91,7 +79,5 @@ data class CachedProcessedResult(
     val createdAt: String,
     val updatedAt: String,
     val status: ImageRequestStatus,
-    val hasOriginal: Boolean = false,
-    val resultMetadata: Map<String, ResultMetadata>? = null,
     val description: String? = null,
 )

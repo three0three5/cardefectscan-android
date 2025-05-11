@@ -97,13 +97,11 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideMinioClient(
-        @AuthenticatedOkHttpClient authenticatedClient: OkHttpClient,
         @DefaultOkHttpClient client: OkHttpClient,
         @ApplicationContext context: Context,
         imageLoader: ImageLoader,
     ): MinioClient = MinioClient(
         defaultClient = client,
-        authenticatedClient = authenticatedClient,
         context = context,
         imageLoader = imageLoader,
     )

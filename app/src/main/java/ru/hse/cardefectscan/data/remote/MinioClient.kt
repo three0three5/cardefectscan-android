@@ -2,7 +2,6 @@ package ru.hse.cardefectscan.data.remote
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import coil3.BitmapImage
@@ -23,7 +22,6 @@ import java.io.IOException
 
 class MinioClient(
     private val defaultClient: OkHttpClient,
-    private val authenticatedClient: OkHttpClient,
     private val context: Context,
     private val imageLoader: ImageLoader,
 ) {
@@ -55,30 +53,6 @@ class MinioClient(
             throw ex
         }
     }
-
-    suspend fun loadBitmapWithMetadata(imageLink: String): Pair<Bitmap, String>? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val request = Request.Builder().url(imageLink).build()
-                val response = authenticatedClient.newCall(request).execute()
-
-                if (!response.isSuccessful) return@withContext null
-                val body = response.body ?: return@withContext null
-
-                val bitmap = BitmapFactory.decodeStream(body.byteStream())
-                val metadata = response.headers["x-amz-meta-json-data"] ?: run {
-                    Log.e("RequestsUseCase", "Metadata not found in response headers")
-                    return@withContext null
-                }
-
-                Pair(bitmap, metadata)
-            } catch (e: Exception) {
-                Log.e("RequestsUseCase", "Error loading image: ${e.message}")
-                null
-            }
-        }
-    }
-
 
     suspend fun loadBitmap(imageLink: String): Bitmap? {
         val request = ImageRequest.Builder(context)
