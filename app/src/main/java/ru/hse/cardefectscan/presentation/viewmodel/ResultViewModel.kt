@@ -41,7 +41,13 @@ class ResultViewModel @Inject constructor(
 
     fun onPixelClicked(x: Int, y: Int) {
         Log.d("ResultViewModel", "onPixelClicked: $x, $y")
-        val code = result?.result?.getPixel(x, y) ?: return
+        val mask = result?.result ?: return
+        val readableMask = if (mask.config == Bitmap.Config.HARDWARE) {
+            mask.copy(Bitmap.Config.ARGB_8888, false)
+        } else {
+            mask
+        }
+        val code = readableMask.getPixel(x, y)
         val segment = Color.red(code)
         val damage = Color.green(code)
         selectedSegment = segment to damage
