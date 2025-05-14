@@ -3,8 +3,10 @@ package ru.hse.cardefectscan.presentation.viewmodel
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.provider.MediaStore
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,6 +37,15 @@ class ResultViewModel @Inject constructor(
     var transparencyCoefficient: Float by mutableFloatStateOf(0.5f)
     var labelSet by mutableStateOf<Set<Pair<Int, Int>>?>(null)
         private set
+    var selectedSegment by mutableStateOf<Pair<Int, Int>?>(null)
+
+    fun onPixelClicked(x: Int, y: Int) {
+        Log.d("ResultViewModel", "onPixelClicked: $x, $y")
+        val code = result?.result?.getPixel(x, y) ?: return
+        val segment = Color.red(code)
+        val damage = Color.green(code)
+        selectedSegment = segment to damage
+    }
 
     fun loadData(imageId: String) =
         viewModelScope.launch {

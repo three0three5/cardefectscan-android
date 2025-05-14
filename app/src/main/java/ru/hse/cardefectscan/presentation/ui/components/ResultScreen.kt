@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,14 +26,22 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -50,7 +59,6 @@ fun ResultScreen(
     imageId: String,
     vm: ResultViewModel = hiltViewModel(),
 ) {
-    Log.d("ResultScreen", "Loading data")
     vm.loadData(imageId)
     Scaffold { innerPadding ->
         if (vm.isLoading) {
@@ -106,8 +114,17 @@ fun ProcessedResultComponent(
 
         Text(text = "Результат сегментации", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        ResultImage(vm)
+        ResultImage(vm,
+            onPixelClick = { x, y -> vm.onPixelClicked(x, y) }
+        )
         Spacer(modifier = Modifier.height(16.dp))
+
+        vm.selectedSegment?.let {
+            Text(text = "Выбранный сегмент: (${it.first}, ${it.second})", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(16.dp))
+            LegendRow(vm, it.first, it.second)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         vm.result?.result?.let {
             if (vm.isRendering) {
@@ -193,21 +210,50 @@ private fun Legend(
 @Composable
 private fun ResultImage(
     vm: ResultViewModel,
+    onPixelClick: (Int, Int) -> Unit
 ) {
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+
     LaunchedEffect(vm.transparencyCoefficient) {
         snapshotFlow { vm.transparencyCoefficient }
             .debounce(500)
-            .collectLatest {
-                vm.renderImage()
-            }
+            .collectLatest { vm.renderImage() }
     }
+
     vm.renderedBitmap?.let { bmp ->
         Image(
             bitmap = bmp.asImageBitmap(),
             contentDescription = "Результат",
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxSize()
                 .border(1.dp, Color.LightGray)
+                .onGloballyPositioned { coords ->
+                    containerSize = coords.size
+                }
+                .pointerInput(bmp, containerSize) {
+                    detectTapGestures { tap ->
+                        // Получаем коэффициент во сколько раз увеличена картинка чтобы получить ее размер в контейнере
+                        val scaleX = containerSize.width.toFloat()  / bmp.width
+                        val scaleY = containerSize.height.toFloat() / bmp.height
+                        val scale  = minOf(scaleX, scaleY)
+
+                        // Получаем начало координат картинки внутри контейнера
+                        val offsetX = (containerSize.width - bmp.width * scale) / 2f
+                        val offsetY = (containerSize.height - bmp.height * scale) / 2f
+
+                        // Локальная координата тапа относительно начала bmp
+                        val localX = (tap.x - offsetX).coerceIn(0f, bmp.width * scale)
+                        val localY = (tap.y - offsetY).coerceIn(0f, bmp.height * scale)
+
+                        // В пиксели оригинала
+                        val bmpX = (localX / scale).toInt().coerceIn(0, bmp.width  - 1)
+                        val bmpY = (localY / scale).toInt().coerceIn(0, bmp.height - 1)
+
+                        Log.d("ResultScreen", "Tapped bitmap pixel: $bmpX, $bmpY")
+                        onPixelClick(bmpX, bmpY)
+                    }
+                }
         )
     } ?: run {
         if (vm.isRendering) {
